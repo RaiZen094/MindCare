@@ -1,11 +1,93 @@
-# MindCare Connect - Authentication System
+# MindCare Connect 🧠💚
 
-## Overview
-A comprehensive full-stack authentication system for the MindCare Connect mental health platform, built with Spring Boot (backend) and Next.js (frontend).
+A comprehensive mental health platform connecting patients with verified mental health professionals in Bangladesh.
+
+## 🚀 Quick Start
+
+### Prerequisites
+- **Java 21** (installed at `C:\Program Files\Java\jdk-21`)
+- **Node.js 18+** 
+- **npm** or **yarn**
+
+### 🎯 One-Click Startup
+```powershell
+# Start both frontend and backend automatically
+.\start-mindcare.ps1
+```
+
+### 🔧 Manual Startup
+
+#### Backend (Spring Boot)
+```powershell
+# Option 1: Use startup script
+cd backend
+.\start-backend.ps1
+
+# Option 2: Manual command
+cd backend
+$env:JAVA_HOME = "C:\Program Files\Java\jdk-21"
+.\mvnw.cmd spring-boot:run
+```
+
+#### Frontend (Next.js)
+```powershell
+# Option 1: Use startup script  
+cd frontend
+.\start-frontend.ps1
+
+# Option 2: Manual command
+cd frontend
+npm run dev
+```
+
+## 📱 Application URLs
+
+- **Frontend**: http://localhost:3000
+- **Backend API**: http://localhost:8080/api
+- **H2 Database Console**: http://localhost:8080/api/h2-console
+
+## 🔐 Default Credentials
+
+**Admin Account:**
+- Email: `admin@mindcareconnect.bd`
+- Password: `MindCare@Admin2025`
+
+> ⚠️ **Security Notice**: Change the default admin password after first login!
 
 ## Features
 
-### Security Features
+### 🎭 User Roles & Features
+
+#### 👤 General User (Anonymous)
+- ✅ Browse Wellness Hub articles and resources
+- ✅ View professional profiles and specializations  
+- ✅ Use AI Assistant for initial mental health assessment
+- ✅ Access FAQ and platform information
+
+#### 🏥 Patient (Registered User) 
+- ✅ All general user features
+- ✅ Create secure, private profile
+- ✅ Book and manage appointments (online/physical)
+- ✅ Private mood journal and wellness tools
+- ✅ AI Wellness Companion
+- ✅ Participate in peer support community
+- ✅ Secure messaging with chosen professionals
+
+#### 👨‍⚕️ Mental Health Professional
+- ✅ Verified profile with credentials and specializations
+- ✅ Personal dashboard for practice management
+- ✅ Calendar management for availability
+- ✅ Secure patient messaging and communication
+- ✅ Contribute articles to Wellness Hub (admin approved)
+
+#### 🛡️ Administrator
+- ✅ Professional verification and onboarding
+- ✅ Wellness Hub content management
+- ✅ Community moderation and user support
+- ✅ Platform analytics and monitoring
+- ✅ Data privacy and security compliance
+
+### 🔒 Security Features
 - **JWT-based authentication** with secure token management
 - **Role-based access control** (Admin, Professional, Patient, Moderator)
 - **Password encryption** using BCrypt with strength 12
@@ -21,112 +103,197 @@ A comprehensive full-stack authentication system for the MindCare Connect mental
 - **Password complexity requirements**
 - **Default admin user creation**
 
-### Frontend Features
+### 💻 Frontend Features
 - **Responsive authentication pages** (Login/Register)
 - **Form validation** with React Hook Form and Yup
 - **Authentication context** for state management
 - **Protected routes** and role-based navigation
-- **User dashboard** with role-specific content
+- **Role-specific dashboards** (Patient, Professional, Admin)
+- **Professional and Admin portals** with unique features
 
-## Project Structure
+## 🏗️ Project Structure
 
 ```
-mindcare/
-├── backend/                          # Spring Boot API
-│   ├── src/main/java/com/mindcare/connect/
-│   │   ├── config/                   # Security & JWT configuration
-│   │   ├── controller/               # REST API endpoints
-│   │   ├── dto/                      # Data Transfer Objects
-│   │   ├── entity/                   # JPA entities
-│   │   ├── repository/               # Data access layer
-│   │   └── service/                  # Business logic
-│   └── src/main/resources/
-│       └── application.properties    # Configuration
-├── frontend/                         # Next.js Application
+MindCare/
+├── frontend/                 # Next.js 15 React Application
 │   ├── src/
-│   │   ├── app/                      # Next.js App Router
-│   │   │   ├── auth/                 # Authentication pages
-│   │   │   └── dashboard/            # User dashboard
-│   │   ├── contexts/                 # React contexts
-│   │   └── lib/                      # Utilities & API client
-│   └── .env.local                    # Environment variables
-└── README.md
+│   │   ├── app/             # App Router pages
+│   │   │   ├── auth/        # Authentication pages
+│   │   │   ├── dashboard/   # User dashboards
+│   │   │   ├── admin/       # Admin portal
+│   │   │   └── professional/ # Professional portal
+│   │   ├── contexts/        # React contexts (Auth)
+│   │   └── lib/            # Utilities (API, Auth)
+│   ├── start-frontend.ps1   # Frontend startup script
+│   └── package.json
+│
+├── backend/                 # Spring Boot 3.2 Application  
+│   ├── src/
+│   │   └── main/
+│   │       ├── java/
+│   │       │   └── com/mindcare/connect/
+│   │       │       ├── config/      # Security & JWT config
+│   │       │       ├── controller/  # REST endpoints
+│   │       │       ├── dto/         # Data Transfer Objects
+│   │       │       ├── entity/      # JPA entities
+│   │       │       ├── repository/  # Data repositories
+│   │       │       └── service/     # Business logic
+│   │       └── resources/
+│   │           └── application.properties
+│   ├── start-backend.ps1    # Backend startup script
+│   ├── start-backend.bat    # Windows batch script
+│   └── pom.xml
+│
+├── start-mindcare.ps1       # Full-stack startup script
+├── .gitignore              # Combined gitignore
+└── README.md               # This file
 ```
 
-## Backend API Endpoints
+## 🔧 Technology Stack
 
-### Authentication
+### Frontend
+- **Framework**: Next.js 15 with App Router
+- **Language**: JavaScript (converted from TypeScript)
+- **Styling**: Tailwind CSS
+- **State Management**: React Context (Auth)
+- **HTTP Client**: Axios
+- **Form Handling**: React Hook Form + Yup validation
+- **Authentication**: JWT with secure cookie storage
+
+### Backend  
+- **Framework**: Spring Boot 3.2.0
+- **Language**: Java 21
+- **Security**: Spring Security + JWT
+- **Database**: H2 (development) / PostgreSQL (production)
+- **ORM**: Hibernate JPA
+- **Build Tool**: Maven
+- **Password Encryption**: BCrypt
+
+## 🔌 API Endpoints
+
+### Public Endpoints (No Authentication Required)
+- `GET /api/public/status` - Application status check
+- `GET /api/public/info` - Basic application information
+- `GET /api/public/health` - Health check endpoint
+
+### Authentication Endpoints
 - `POST /api/auth/register` - User registration
-- `POST /api/auth/login` - User authentication
-- `POST /api/auth/logout` - User logout
-- `GET /api/auth/validate` - Token validation
-- `GET /api/auth/health` - Health check
+- `POST /api/auth/login` - User login
+- `POST /api/auth/logout` - User logout (clears session)
 
-### Protected Routes
-- `/api/admin/**` - Admin only (ROLE_ADMIN)
-- `/api/professional/**` - Professionals (ROLE_PROFESSIONAL, ROLE_ADMIN)
-- `/api/patient/**` - Patients (ROLE_PATIENT, ROLE_PROFESSIONAL, ROLE_ADMIN)
-- `/api/community/moderate/**` - Moderators (ROLE_MODERATOR, ROLE_ADMIN)
+### Protected Endpoints (Authentication Required)
+- `GET /api/user/profile` - Get current user profile
+- `PUT /api/user/profile` - Update user profile
+- `GET /api/user/dashboard` - Role-specific dashboard data
 
-## User Roles
+### Admin Endpoints (ADMIN role required)
+- `GET /api/admin/users` - List all users
+- `PUT /api/admin/users/{id}/role` - Update user role
+- `DELETE /api/admin/users/{id}` - Delete user account
 
-### ADMIN
-- Full system access
-- User management
-- Professional verification
-- Platform configuration
+## 👥 User Roles & Permissions
 
-### PROFESSIONAL
-- Manage appointments
-- Patient communication
-- Profile management
-- Contribute content
+### 🔑 ADMIN (Administrator)
+- Full system access and control
+- User management and role assignment
+- Professional verification and approval
+- Platform configuration and monitoring
+- Access to all features and endpoints
 
-### PATIENT
-- Book appointments
-- Access wellness tools
-- Use AI features
-- Join peer support
+### 👨‍⚕️ PROFESSIONAL (Mental Health Professional)
+- Manage patient appointments and schedules
+- Patient communication and consultation
+- Professional profile and credentials management
+- Contribute educational content and resources
+- Access professional dashboard and tools
 
-### MODERATOR
-- Community moderation
-- Content oversight
-- User support
+### 🧑‍💼 PATIENT (General User/Client)
+- Book appointments with professionals
+- Access wellness tools and resources
+- Use AI-powered mental health features
+- Join peer support communities and forums
+- Personal health tracking and records
 
-## Environment Variables
+### 🛡️ MODERATOR (Community Moderator)
+- Community forum moderation
+- Content oversight and approval
+- User support and assistance
+- Report management and resolution
 
-### Backend (application.properties)
+## 🚀 Deployment
+
+### Environment Configuration
+
+#### Development (H2 Database)
 ```properties
-# Database
-DATABASE_URL=jdbc:postgresql://localhost:5432/mindcare_connect
-DATABASE_USERNAME=mindcare_user
-DATABASE_PASSWORD=mindcare_pass
-
-# JWT
-JWT_SECRET=your-super-secret-jwt-key
-JWT_EXPIRATION=86400000
-
-# CORS
-CORS_ALLOWED_ORIGINS=http://localhost:3000,https://your-domain.com
-
-# Admin
-ADMIN_EMAIL=admin@mindcareconnect.bd
-ADMIN_PASSWORD=your-secure-admin-password
+# Backend - application.properties
+spring.datasource.url=jdbc:h2:mem:mindcare
+spring.h2.console.enabled=true
+jwt.secret=your-secret-key
+jwt.expiration=86400000
 ```
 
-### Frontend (.env.local)
-```env
+#### Production (PostgreSQL)
+```properties
+# Backend - application.properties  
+spring.datasource.url=jdbc:postgresql://localhost:5432/mindcare
+spring.datasource.username=${DB_USERNAME}
+spring.datasource.password=${DB_PASSWORD}
+spring.jpa.hibernate.ddl-auto=update
+jwt.secret=${JWT_SECRET}
+jwt.expiration=86400000
+```
+
+### Environment Variables
+Create `.env.local` in frontend directory:
+```bash
 NEXT_PUBLIC_API_URL=http://localhost:8080/api
-NEXT_PUBLIC_APP_NAME=MindCare Connect
 ```
 
-## Getting Started
+### Production Build
 
-### Prerequisites
-- Java 17+
-- Node.js 18+
-- PostgreSQL 13+
-- Maven 3.6+
+#### Frontend Build
+```powershell
+cd frontend
+npm run build
+npm start
+```
+
+#### Backend Build  
+```powershell
+cd backend
+./mvnw clean package
+java -jar target/mindcare-connect-0.0.1-SNAPSHOT.jar
+```
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create your feature branch: `git checkout -b feature/AmazingFeature`
+3. Commit your changes: `git commit -m 'Add some AmazingFeature'`
+4. Push to the branch: `git push origin feature/AmazingFeature`
+5. Open a Pull Request
+
+## 📝 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🆘 Support
+
+For support and questions:
+- Create an issue in this repository
+- Contact the development team
+- Check the documentation in the `/docs` folder
+
+## 🙏 Acknowledgments
+
+- Built for Javafest - advancing mental health technology in Bangladesh
+- Spring Boot and Next.js communities for excellent documentation
+- All contributors and supporters of the MindCare Connect platform
+
+---
+
+**MindCare Connect** - Bridging the gap in mental health support across Bangladesh 🇧🇩
 
 ### Backend Setup
 1. Navigate to backend directory
