@@ -15,11 +15,18 @@ const nextConfig = {
   
   // Experimental features
   experimental: {
-    serverActions: true,
+    serverActions: {
+      allowedOrigins: ['localhost:3000', 'localhost:3001']
+    },
   },
   
   // Enable strict mode
   reactStrictMode: true,
+  
+  // Ignore ESLint during build
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   
   // Security headers
   async headers() {

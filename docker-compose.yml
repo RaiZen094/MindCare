@@ -2,82 +2,76 @@ version: '3.8'
 
 services:
   # PostgreSQL Database
-  database:
+  postgres:
     image: postgres:15-alpine
-    container_name: mindcare-database
+    container_name: mindcare-postgres
+    restart: unless-stopped
     environment:
       POSTGRES_DB: mindcare_connect
       POSTGRES_USER: mindcare_user
-      POSTGRES_PASSWORD: mindcare_dev_password_123
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+      POSTGRES_PASSWORD: mindcare_pass
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8"
     ports:
       - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init:/docker-entrypoint-initdb.d
     networks:
       - mindcare-network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U mindcare_user -d mindcare_connect"]
       interval: 30s
       timeout: 10s
-      retries: 3
+      retries: 5
 
-  # Backend Spring Boot Application
+  # Spring Boot Backend
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
     container_name: mindcare-backend
+    restart: unless-stopped
     environment:
-      # Database Configuration
-      DATABASE_URL: jdbc:postgresql://database:5432/mindcare_connect
+      SPRING_PROFILES_ACTIVE: production
+      DATABASE_URL: jdbc:postgresql://postgres:5432/mindcare_connect
       DATABASE_USERNAME: mindcare_user
-      DATABASE_PASSWORD: mindcare_dev_password_123
+      DATABASE_PASSWORD: mindcare_pass
       DATABASE_DRIVER: org.postgresql.Driver
       HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
-      
-      # JPA Configuration
       JPA_DDL_AUTO: update
-      JPA_SHOW_SQL: true
-      JPA_FORMAT_SQL: true
-      H2_CONSOLE_ENABLED: false
-      
-      # JWT Configuration
-      JWT_SECRET: dev_jwt_secret_key_for_development_not_secure
+      JPA_SHOW_SQL: "false"
+      JWT_SECRET: MindCare_Connect_Super_Secret_Key_2025_Bangladesh_Mental_Health_Platform_Docker
       JWT_EXPIRATION: 86400000
-      
-      # CORS Configuration
       CORS_ALLOWED_ORIGINS: http://localhost:3000,http://frontend:3000
-      
-      # Admin Configuration
-      ADMIN_EMAIL: admin@localhost
-      ADMIN_PASSWORD: admin123
-      
-      # Spring Profile
-      SPRING_PROFILES_ACTIVE: development
+      ADMIN_EMAIL: admin@mindcareconnect.bd
+      ADMIN_PASSWORD: MindCare@Admin2025
+      PORT: 8080
     ports:
       - "8080:8080"
     depends_on:
-      database:
+      postgres:
         condition: service_healthy
     networks:
       - mindcare-network
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8080/api/public/health || exit 1"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/api/public/health"]
       interval: 30s
       timeout: 10s
-      retries: 3
+      retries: 5
       start_period: 60s
 
-  # Frontend Next.js Application
+  # Next.js Frontend
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
     container_name: mindcare-frontend
+    restart: unless-stopped
     environment:
-      NEXT_PUBLIC_API_URL: http://localhost:8080/api
       NODE_ENV: production
+      NEXT_PUBLIC_API_URL: http://localhost:8080/api
+      PORT: 3000
+      HOSTNAME: 0.0.0.0
     ports:
       - "3000:3000"
     depends_on:
@@ -86,30 +80,36 @@ services:
     networks:
       - mindcare-network
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:3000 || exit 1"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # Redis for session management (optional, for future use)
+  redis:
+    image: redis:7-alpine
+    container_name: mindcare-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --requirepass mindcare_redis_pass
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - mindcare-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
       interval: 30s
       timeout: 10s
       retries: 3
 
-  # Nginx Reverse Proxy (Optional)
-  nginx:
-    image: nginx:alpine
-    container_name: mindcare-nginx
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
-    ports:
-      - "80:80"
-      - "443:443"
-    depends_on:
-      - frontend
-      - backend
-    networks:
-      - mindcare-network
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
 
 networks:
   mindcare-network:
     driver: bridge
-
-volumes:
-  postgres_data:
-    driver: local
