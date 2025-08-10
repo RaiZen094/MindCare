@@ -222,26 +222,125 @@ MindCare/
 
 ## 🚀 Deployment
 
+### 🐳 **Docker Deployment**
+
+#### Development Environment
+```bash
+# Start all services with Docker
+./scripts/dev-docker.sh        # Linux/Mac
+scripts\dev-docker.bat         # Windows
+
+# Or manually with docker-compose
+docker-compose up --build -d
+```
+
+#### Production Environment
+```bash
+# Production deployment with PostgreSQL
+docker-compose -f docker-compose.prod.yml up -d
+
+# View logs
+docker-compose -f docker-compose.prod.yml logs -f
+
+# Scale services
+docker-compose -f docker-compose.prod.yml up -d --scale backend=3
+```
+
+### 🏗️ **VM Deployment**
+
+1. **Prepare your VM:**
+   ```bash
+   # Run the setup script on your VM
+   chmod +x scripts/deploy-vm.sh
+   ./scripts/deploy-vm.sh
+   ```
+
+2. **Configure environment:**
+   ```bash
+   # Edit production environment variables
+   nano /opt/mindcare-connect/.env
+   ```
+
+3. **Set up SSL (recommended):**
+   ```bash
+   # Using Let's Encrypt
+   sudo certbot --nginx -d yourdomain.com
+   ```
+
+4. **Start the application:**
+   ```bash
+   sudo systemctl start mindcare-connect
+   ```
+
+### ⚙️ **CI/CD Pipeline**
+
+#### GitHub Actions Setup
+
+1. **Add Repository Secrets:**
+   - `VM_HOST` - Your VM IP address
+   - `VM_USERNAME` - SSH username  
+   - `VM_SSH_KEY` - Private SSH key
+   - `VM_PORT` - SSH port (default: 22)
+   - `SLACK_WEBHOOK` - Slack notification webhook (optional)
+
+2. **Automated Pipeline:**
+   - ✅ **Test** - Frontend & Backend tests on PR/Push
+   - ✅ **Build** - Docker images built and pushed to GitHub Container Registry
+   - ✅ **Deploy** - Automatic deployment to VM on main branch push
+   - ✅ **Monitor** - Health checks and notifications
+
+3. **Manual Deployment:**
+   ```bash
+   # Trigger deployment workflow
+   git push origin main
+   ```
+
 ### Environment Configuration
 
-#### Development (H2 Database)
-```properties
-# Backend - application.properties
-spring.datasource.url=jdbc:h2:mem:mindcare
-spring.h2.console.enabled=true
-jwt.secret=your-secret-key
-jwt.expiration=86400000
+#### Development (PostgreSQL with Docker)
+```bash
+# Start development environment with PostgreSQL
+./scripts/dev-docker.sh        # Linux/Mac
+scripts\dev-docker.bat         # Windows
+
+# Database URLs:
+# - Application: http://localhost:8080/api
+# - Direct DB: postgresql://localhost:5432/mindcare_connect
 ```
 
 #### Production (PostgreSQL)
+
+**Option 1: Automated Setup**
+```bash
+# Setup PostgreSQL database (Linux/Mac)
+chmod +x scripts/setup-postgresql.sh
+./scripts/setup-postgresql.sh
+
+# Setup PostgreSQL database (Windows)
+scripts\setup-postgresql.bat
+```
+
+**Option 2: Manual Setup**
+```sql
+-- Connect to PostgreSQL as superuser
+CREATE DATABASE mindcare_connect;
+CREATE USER mindcare_user WITH PASSWORD 'your_secure_password';
+GRANT ALL PRIVILEGES ON DATABASE mindcare_connect TO mindcare_user;
+
+-- Run initialization script
+\i database/init.sql
+```
+
+**Environment Configuration:**
 ```properties
-# Backend - application.properties  
-spring.datasource.url=jdbc:postgresql://localhost:5432/mindcare
-spring.datasource.username=${DB_USERNAME}
-spring.datasource.password=${DB_PASSWORD}
-spring.jpa.hibernate.ddl-auto=update
-jwt.secret=${JWT_SECRET}
-jwt.expiration=86400000
+# Production - application-production.properties
+DATABASE_URL=jdbc:postgresql://localhost:5432/mindcare_connect
+DATABASE_USERNAME=mindcare_user
+DATABASE_PASSWORD=your_secure_password
+DATABASE_DRIVER=org.postgresql.Driver
+HIBERNATE_DIALECT=org.hibernate.dialect.PostgreSQLDialect
+JPA_DDL_AUTO=update
+SPRING_PROFILES_ACTIVE=production
 ```
 
 ### Environment Variables

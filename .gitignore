@@ -2,6 +2,30 @@
 # Combined .gitignore for Frontend (Next.js) and Backend (Spring Boot)
 
 ####################
+# Docker & Deployment
+####################
+
+# Environment variables
+.env
+.env.local
+.env.production
+.env.*.local
+
+# Docker
+.docker/
+docker-compose.override.yml
+
+# SSL certificates
+ssl/
+*.pem
+*.key
+*.crt
+
+# Deployment logs
+logs/
+*.log
+
+####################
 # Frontend (Next.js)
 ####################
 
