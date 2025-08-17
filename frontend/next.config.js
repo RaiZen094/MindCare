@@ -1,11 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Enable standalone output for Docker
-  output: 'standalone',
+  // Remove standalone output for Vercel (use default)
+  // output: 'standalone', // Comment out for Vercel deployment
   
-  // Image optimization for Docker
+  // Image optimization for production
   images: {
-    unoptimized: true,
+    unoptimized: false, // Enable optimization for Vercel
   },
   
   // Environment variables
@@ -16,7 +16,7 @@ const nextConfig = {
   // Experimental features
   experimental: {
     serverActions: {
-      allowedOrigins: ['localhost:3000', 'localhost:3001']
+      allowedOrigins: ['localhost:3000', 'localhost:3001', '*.vercel.app']
     },
   },
   
