@@ -76,11 +76,11 @@ public class User {
     
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+    private LocalDateTime createdAt = LocalDateTime.now();
     
     @LastModifiedDate
     @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    private LocalDateTime updatedAt = LocalDateTime.now();
     
     // Default constructor
     public User() {}
@@ -173,5 +173,20 @@ public class User {
     
     public void lockAccount(int lockoutMinutes) {
         this.lockedUntil = LocalDateTime.now().plusMinutes(lockoutMinutes);
+    }
+    
+    @PrePersist
+    protected void onCreate() {
+        if (createdAt == null) {
+            createdAt = LocalDateTime.now();
+        }
+        if (updatedAt == null) {
+            updatedAt = LocalDateTime.now();
+        }
+    }
+    
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
     }
 }

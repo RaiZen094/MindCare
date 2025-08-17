@@ -214,6 +214,11 @@ public class UserService implements UserDetailsService {
         admin.setStatus(UserStatus.ACTIVE);
         admin.setEmailVerified(true);
         
+        // Manually set timestamps since JPA Auditing might not be working
+        LocalDateTime now = LocalDateTime.now();
+        admin.setCreatedAt(now);
+        admin.setUpdatedAt(now);
+        
         return userRepository.save(admin);
     }
     
