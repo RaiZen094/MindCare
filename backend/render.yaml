@@ -1,0 +1,30 @@
+services:
+  - type: web
+    name: mindcare-backend
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    buildCommand: ""
+    startCommand: "java -jar app.jar"
+    healthCheckPath: "/api/public/health"
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: production
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      - key: JWT_EXPIRATION
+        value: "86400000"
+      - key: ADMIN_EMAIL
+        value: admin@mindcareconnect.bd
+      - key: ADMIN_PASSWORD
+        generateValue: true
+      - key: CORS_ALLOWED_ORIGINS
+        value: "http://localhost:3000,https://your-frontend.vercel.app"
+      - key: PORT
+        value: "8080"
+
+databases:
+  - name: mindcare-database
+    databaseName: mindcare
+    user: mindcare_user
+    plan: free
