@@ -7,19 +7,20 @@ services:
     buildCommand: ""
     startCommand: "java -jar app.jar"
     healthCheckPath: "/api/public/health"
+    port: 8080
     envVars:
       - key: SPRING_PROFILES_ACTIVE
         value: production
       - key: DATABASE_URL
         value: postgresql://mindcare_user:tECpz6lKn0b0hIqTWNsbTE1U26UoCQQh@dpg-d2h2jf75r7bs73fl9k1g-a.oregon-postgres.render.com/mindcare_iky2
       - key: JWT_SECRET_KEY
-        generateValue: true
+        value: MindCare_Connect_Super_Secret_Key_2025_Bangladesh_Mental_Health_Platform_Production_256_Bit_Key
       - key: JWT_EXPIRATION
         value: "86400000"
       - key: ADMIN_EMAIL
         value: admin@mindcareconnect.bd
       - key: ADMIN_PASSWORD
-        generateValue: true
+        value: MindCare@AdminProd2025!
       - key: CORS_ALLOWED_ORIGINS
         value: "http://localhost:3000,https://your-frontend.vercel.app"
       - key: PORT

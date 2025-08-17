@@ -55,10 +55,11 @@ coverage/
 .gitattributes
 
 # Docker
-Dockerfile*
-docker-compose*
 .dockerignore
 
 # Documentation
-README.md
 *.md
+!DEPLOYMENT.md
+
+# Environment files
+.env*
