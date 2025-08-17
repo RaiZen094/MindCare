@@ -1,3 +1,4 @@
+# MindCare Backend Deployment Configuration for Render.com
 services:
   - type: web
     name: mindcare-backend
@@ -11,8 +12,12 @@ services:
     envVars:
       - key: SPRING_PROFILES_ACTIVE
         value: production
-      - key: DATABASE_URL
-        value: postgresql://mindcare_user:tECpz6lKn0b0hIqTWNsbTE1U26UoCQQh@dpg-d2h2jf75r7bs73fl9k1g-a.oregon-postgres.render.com/mindcare_iky2
+      - key: SPRING_DATASOURCE_URL
+        value: jdbc:postgresql://dpg-d2h2jf75r7bs73fl9k1g-a.oregon-postgres.render.com/mindcare_iky2?sslmode=require
+      - key: SPRING_DATASOURCE_USERNAME
+        value: mindcare_user
+      - key: SPRING_DATASOURCE_PASSWORD
+        value: tECpz6lKn0b0hIqTWNsbTE1U26UoCQQh
       - key: JWT_SECRET_KEY
         value: MindCare_Connect_Super_Secret_Key_2025_Bangladesh_Mental_Health_Platform_Production_256_Bit_Key
       - key: JWT_EXPIRATION
