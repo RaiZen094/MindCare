@@ -10,6 +10,8 @@ services:
     envVars:
       - key: SPRING_PROFILES_ACTIVE
         value: production
+      - key: DATABASE_URL
+        value: postgresql://mindcare_user:tECpz6lKn0b0hIqTWNsbTE1U26UoCQQh@dpg-d2h2jf75r7bs73fl9k1g-a.oregon-postgres.render.com/mindcare_iky2
       - key: JWT_SECRET_KEY
         generateValue: true
       - key: JWT_EXPIRATION
