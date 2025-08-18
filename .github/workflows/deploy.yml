@@ -104,12 +104,25 @@ jobs:
     - name: 🚀 Trigger Render Deployment
       run: |
         echo "🚀 Triggering Render deployment..."
+        
+        # Validate required secrets
+        if [ -z "${{ secrets.RENDER_API_KEY }}" ]; then
+          echo "❌ RENDER_API_KEY secret is not set"
+          exit 1
+        fi
+        
+        if [ -z "${{ secrets.RENDER_SERVICE_ID }}" ]; then
+          echo "❌ RENDER_SERVICE_ID secret is not set"
+          exit 1
+        fi
+        
+        # Trigger deployment
         response=$(curl -s -w "HTTP_STATUS:%{http_code}" \
           -X POST \
           -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
           -H "Content-Type: application/json" \
           "${{ env.RENDER_API_URL }}/services/${{ secrets.RENDER_SERVICE_ID }}/deploys" \
-          -d '{"clearCache": false}')
+          -d '{}')
         
         body=$(echo "$response" | sed -E 's/HTTP_STATUS:[0-9]+$//')
         status=$(echo "$response" | tr -d '\n' | sed -E 's/.*HTTP_STATUS:([0-9]+)$/\1/')
@@ -121,6 +134,7 @@ jobs:
           echo "✅ Deployment triggered successfully!"
         else
           echo "❌ Failed to trigger deployment. Status: $status"
+          echo "Response: $body"
           exit 1
         fi
     
@@ -174,46 +188,48 @@ jobs:
         cache: 'npm'
         cache-dependency-path: frontend/package-lock.json
     
+    - name: 📦 Install Dependencies
+      run: |
+        cd frontend
+        npm ci
+    
     - name: 📦 Install Vercel CLI
       run: npm i -g vercel@latest
     
-    - name: 🔧 Pull Vercel Environment
+    - name: 🔧 Validate Vercel Secrets
       run: |
-        cd frontend
-        echo "🔧 Pulling Vercel environment information..."
-        vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }} || {
-          echo "⚠️ Failed to pull Vercel environment. This might be expected for first deployment."
-          echo "Continuing with deployment..."
-        }
-      env:
-        VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-        VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-    
-    - name: 🏗️ Build Frontend
-      run: |
-        cd frontend
-        echo "🏗️ Building frontend for production..."
-        vercel build --prod --token=${{ secrets.VERCEL_TOKEN }} || {
-          echo "⚠️ Vercel build failed, trying npm build as fallback..."
-          npm ci
-          npm run build
-        }
-      env:
-        VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-        VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-        NEXT_PUBLIC_API_URL: https://mindcare-backend-uyos.onrender.com/api
+        echo "� Validating Vercel configuration..."
+        if [ -z "${{ secrets.VERCEL_TOKEN }}" ]; then
+          echo "❌ VERCEL_TOKEN secret is not set"
+          exit 1
+        fi
+        
+        if [ -z "${{ secrets.VERCEL_ORG_ID }}" ]; then
+          echo "❌ VERCEL_ORG_ID secret is not set"
+          exit 1
+        fi
+        
+        if [ -z "${{ secrets.VERCEL_PROJECT_ID }}" ]; then
+          echo "❌ VERCEL_PROJECT_ID secret is not set"
+          exit 1
+        fi
+        
+        echo "✅ All Vercel secrets are configured"
     
     - name: 🚀 Deploy to Vercel
       run: |
         cd frontend
         echo "🚀 Deploying to Vercel..."
-        vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }} || {
-          echo "⚠️ Prebuilt deployment failed, trying direct deployment..."
-          vercel --prod --token=${{ secrets.VERCEL_TOKEN }}
-        }
+        
+        # Set environment variables
+        export VERCEL_ORG_ID="${{ secrets.VERCEL_ORG_ID }}"
+        export VERCEL_PROJECT_ID="${{ secrets.VERCEL_PROJECT_ID }}"
+        
+        # Deploy using simple command
+        vercel --prod --token="${{ secrets.VERCEL_TOKEN }}" --yes
+        
+        echo "✅ Frontend deployed to Vercel successfully!"
       env:
-        VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-        VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
         NEXT_PUBLIC_API_URL: https://mindcare-backend-uyos.onrender.com/api
 
   # Integration Tests
