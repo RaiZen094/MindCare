@@ -27,6 +27,13 @@ jobs:
         cd backend
         chmod +x mvnw
         ls -la mvnw
+        echo "✅ Maven wrapper is now executable"
+    
+    - name: 🔍 Verify Maven wrapper
+      run: |
+        cd backend
+        ./mvnw --version
+        echo "✅ Maven wrapper is working!"
     
     - name: 🧪 Test Backend Compilation
       run: |

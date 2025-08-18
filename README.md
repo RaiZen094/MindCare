@@ -8,7 +8,7 @@ A comprehensive mental health platform connecting patients with verified mental 
 
 ## 🌐 Live Application
 
-### Production URLs
+### 🔗 Production URLs
 - **🌍 Frontend**: [https://mind-care-zeta.vercel.app](https://mind-care-zeta.vercel.app)
 - **🔧 Backend API**: [https://mindcare-backend-uyos.onrender.com](https://mindcare-backend-uyos.onrender.com)
 - **❤️ Health Check**: [https://mindcare-backend-uyos.onrender.com/api/auth/health](https://mindcare-backend-uyos.onrender.com/api/auth/health)
@@ -20,9 +20,14 @@ A comprehensive mental health platform connecting patients with verified mental 
 
 ---
 
-## 🚀 Quick Start for Developers
+## 🚀 Quick Start - Local Development
 
-### 🏃‍♂️ TL;DR - Get Running in 2 Minutes
+### 📋 Prerequisites
+- **Docker** and **Docker Compose** installed
+- **Git** for cloning the repository
+- **8GB+ RAM** recommended for smooth development
+
+### 🏃‍♂️ Get Running in 2 Minutes
 
 ```bash
 # 1. Clone the repository
@@ -32,11 +37,188 @@ cd MindCare
 # 2. Start everything with Docker
 docker-compose -f docker-compose.dev.yml up -d --build
 
-# 3. Open http://localhost:3000
-# Login with: admin@mindcareconnect.bd / MindCare@Admin2025
+# 3. Access the application
+# Frontend: http://localhost:3000
+# Backend: http://localhost:8080/api
+# Login: admin@mindcareconnect.bd / MindCare@Admin2025
 ```
 
 **That's it! 🎉** Your development environment is ready.
+
+### 📱 Local Development URLs
+
+| Service | URL | Description |
+|---------|-----|-------------|
+| **Frontend** | [http://localhost:3000](http://localhost:3000) | Main application UI |
+| **Backend API** | [http://localhost:8080/api](http://localhost:8080/api) | REST API endpoints |
+| **Health Check** | [http://localhost:8080/api/auth/health](http://localhost:8080/api/auth/health) | API health status |
+| **H2 Database** | [http://localhost:8080/h2-console](http://localhost:8080/h2-console) | Development database |
+
+### 🔐 Development Credentials
+
+```
+Admin Login:
+Email: admin@mindcareconnect.bd
+Password: MindCare@Admin2025
+
+H2 Database Console:
+JDBC URL: jdbc:h2:mem:testdb
+Username: sa
+Password: (leave empty)
+```
+
+## 🔧 Development Commands
+
+### 🐳 Docker Commands
+```bash
+# Start all services (detached mode)
+docker-compose -f docker-compose.dev.yml up -d --build
+
+# Start with logs visible
+docker-compose -f docker-compose.dev.yml up --build
+
+# View logs of all services
+docker-compose -f docker-compose.dev.yml logs -f
+
+# View logs of specific service
+docker-compose -f docker-compose.dev.yml logs -f backend-dev
+docker-compose -f docker-compose.dev.yml logs -f frontend-dev
+
+# Restart services (after code changes)
+docker-compose -f docker-compose.dev.yml restart
+
+# Stop all services
+docker-compose -f docker-compose.dev.yml down
+
+# Clean restart (removes containers and rebuilds)
+docker-compose -f docker-compose.dev.yml down
+docker-compose -f docker-compose.dev.yml up --build
+
+# Check running services
+docker-compose -f docker-compose.dev.yml ps
+```
+
+### 🔄 Development Workflow
+```bash
+# 1. Make code changes in backend/ or frontend/ directories
+# 2. Restart containers to see changes
+docker-compose -f docker-compose.dev.yml restart
+
+# 3. For major changes, rebuild
+docker-compose -f docker-compose.dev.yml up --build
+
+# 4. Check logs if something breaks
+docker-compose -f docker-compose.dev.yml logs -f
+```
+
+## 🧪 Testing Your Setup
+
+### ✅ Quick Verification Steps
+1. **Frontend Test**: Open [http://localhost:3000](http://localhost:3000)
+2. **Backend Test**: Visit [http://localhost:8080/api/auth/health](http://localhost:8080/api/auth/health)
+3. **Login Test**: Use admin credentials above
+4. **Registration Test**: Create a new user account
+5. **API Test**: Try the curl command below
+
+### 🔍 API Testing Examples
+```bash
+# Test health endpoint
+curl http://localhost:8080/api/auth/health
+
+# Test user registration
+curl -X POST http://localhost:8080/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "firstName": "Test",
+    "lastName": "User",
+    "email": "test@example.com",
+    "password": "Test123!",
+    "phone": "+8801234567890"
+  }'
+
+# Test user login
+curl -X POST http://localhost:8080/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "test@example.com",
+    "password": "Test123!"
+  }'
+```
+
+## 🚨 Common Issues & Quick Fixes
+
+### 🔧 Port Already in Use
+```bash
+# Check what's using the ports
+lsof -i :3000  # Frontend
+lsof -i :8080  # Backend
+
+# Kill the process or change ports in docker-compose.dev.yml
+```
+
+### 🐳 Docker Build Fails
+```bash
+# Clean Docker cache and rebuild
+docker system prune -f
+docker-compose -f docker-compose.dev.yml build --no-cache
+docker-compose -f docker-compose.dev.yml up --build
+```
+
+### 🔌 Can't Connect to Backend
+```bash
+# Check if backend container is running
+docker-compose -f docker-compose.dev.yml ps
+
+# Restart backend container
+docker-compose -f docker-compose.dev.yml restart backend-dev
+
+# Check backend logs
+docker-compose -f docker-compose.dev.yml logs backend-dev
+```
+
+### 🔐 Login Issues
+- Verify you're using: `admin@mindcareconnect.bd` / `MindCare@Admin2025`
+- Clear browser cookies/localStorage
+- Check if backend is running: `curl http://localhost:8080/api/auth/health`
+
+### 💾 Database Issues
+```bash
+# Reset database (H2 in-memory resets on restart)
+docker-compose -f docker-compose.dev.yml restart backend-dev
+
+# Check database console: http://localhost:8080/h2-console
+```
+
+## 🛠️ Alternative Setup (Without Docker)
+
+If you prefer running services individually:
+
+### 📋 Prerequisites
+- **Java 21** (Backend)
+- **Node.js 18+** (Frontend)
+- **Git**
+
+### ⚙️ Backend Setup
+```bash
+cd backend
+./mvnw spring-boot:run
+# Windows: mvnw.cmd spring-boot:run
+# Available at: http://localhost:8080
+```
+
+### 🌐 Frontend Setup
+```bash
+cd frontend
+npm install
+npm run dev
+# Available at: http://localhost:3000
+```
+
+### 🔧 Environment Variables
+Create `frontend/.env.local`:
+```bash
+NEXT_PUBLIC_API_URL=http://localhost:8080/api
+```
 
 ---
 
@@ -325,47 +507,145 @@ SPRING_PROFILES_ACTIVE=production
 
 ---
 
-## 📁 Project Structure
+## 🏗️ Project Structure
 
 ```
 MindCare/
 ├── 📁 frontend/                    # Next.js React Application
 │   ├── 📁 src/app/                # App Router pages
-│   │   ├── 📁 auth/               # Authentication pages
-│   │   ├── 📁 dashboard/          # User dashboards
+│   │   ├── 📁 auth/               # Login/Register pages
+│   │   ├── 📁 dashboard/          # User dashboard
 │   │   ├── 📁 admin/              # Admin portal
 │   │   └── 📁 professional/       # Professional portal
 │   ├── 📁 src/contexts/           # React contexts (Auth)
 │   ├── 📁 src/lib/                # Utilities (API, Auth)
-│   ├── 📄 package.json            # Dependencies and scripts
-│   ├── 📄 next.config.js          # Next.js configuration
-│   ├── 📄 tailwind.config.js      # Tailwind CSS config
-│   ├── 📄 vercel.json             # Vercel deployment config
-│   └── 📄 Dockerfile              # Docker configuration
+│   ├── 📄 package.json            # Dependencies
+│   ├── 📄 next.config.js          # Next.js config
+│   └── 📄 Dockerfile              # Docker config
 │
 ├── 📁 backend/                     # Spring Boot Application
 │   ├── 📁 src/main/java/com/mindcare/connect/
-│   │   ├── 📁 config/             # Security & configuration
-│   │   ├── 📁 controller/         # REST API endpoints
+│   │   ├── 📁 config/             # Security & JWT config
+│   │   ├── 📁 controller/         # REST endpoints
 │   │   ├── 📁 dto/                # Data Transfer Objects
 │   │   ├── 📁 entity/             # JPA entities
 │   │   ├── 📁 repository/         # Data repositories
 │   │   └── 📁 service/            # Business logic
-│   ├── 📁 src/main/resources/     # Configuration files
+│   ├── 📁 src/main/resources/     # Config files
 │   ├── 📄 pom.xml                 # Maven dependencies
-│   ├── 📄 Dockerfile              # Docker configuration
-│   └── 📄 render.yaml             # Render deployment config
+│   └── 📄 Dockerfile              # Docker config
 │
-├── 📁 .github/                     # GitHub Actions CI/CD
-│   ├── 📁 workflows/              # CI/CD pipeline definitions
-│   ├── 📄 SECRETS_SETUP.md        # GitHub secrets guide
-│   └── 📄 README.md               # CI/CD documentation
-│
-├── 📄 docker-compose.yml           # Production Docker setup
-├── 📄 docker-compose.dev.yml      # Development Docker setup
-├── 📄 .gitignore                  # Git ignore rules
+├── 📁 .github/workflows/          # CI/CD pipelines
+├── 📄 docker-compose.dev.yml      # Development setup
+├── 📄 docker-compose.yml          # Production setup
 └── 📄 README.md                   # This file
 ```
+
+## 🔧 Technology Stack
+
+### 🌐 Frontend
+- **Framework**: Next.js 15 with App Router
+- **Language**: JavaScript
+- **Styling**: Tailwind CSS
+- **State Management**: React Context API
+- **Deployment**: Vercel
+
+### ⚙️ Backend
+- **Framework**: Spring Boot 3.2.0
+- **Language**: Java 21
+- **Security**: Spring Security + JWT
+- **Database**: PostgreSQL (prod) / H2 (dev)
+- **ORM**: Hibernate JPA
+- **Deployment**: Render.com
+
+### 🚀 DevOps & Deployment
+- **CI/CD**: GitHub Actions
+- **Containerization**: Docker & Docker Compose
+- **Frontend Hosting**: Vercel (automatic deployments)
+- **Backend Hosting**: Render.com (Docker containers)
+- **Database**: Managed PostgreSQL with backups
+
+---
+
+## 👥 Contributing
+
+### 🔄 Git Workflow
+```bash
+# 1. Fork the repository on GitHub
+# 2. Clone your fork
+git clone https://github.com/YOUR_USERNAME/MindCare.git
+cd MindCare
+
+# 3. Create a feature branch
+git checkout -b feature/awesome-feature
+
+# 4. Make changes and test locally
+docker-compose -f docker-compose.dev.yml up --build
+
+# 5. Commit and push
+git add .
+git commit -m "feat: add awesome feature"
+git push origin feature/awesome-feature
+
+# 6. Create a Pull Request on GitHub
+```
+
+### 📋 Development Guidelines
+- **Docker First**: Always test with Docker before submitting
+- **Test Locally**: Ensure both frontend and backend work
+- **Code Style**: Follow existing patterns and conventions
+- **Commit Messages**: Use conventional commits (feat:, fix:, docs:)
+- **Pull Requests**: Include description and test instructions
+
+---
+
+## � Support & Links
+
+### 🔗 Important Links
+- **🌍 Live Demo**: [https://mind-care-zeta.vercel.app](https://mind-care-zeta.vercel.app)
+- **🔧 Backend API**: [https://mindcare-backend-uyos.onrender.com](https://mindcare-backend-uyos.onrender.com)
+- **📚 GitHub Repository**: [https://github.com/RaiZen094/MindCare](https://github.com/RaiZen094/MindCare)
+- **🐛 Issues**: [GitHub Issues](https://github.com/RaiZen094/MindCare/issues)
+
+### 🆘 Getting Help
+1. **Check this README** for common issues and solutions
+2. **Look at Docker logs**: `docker-compose -f docker-compose.dev.yml logs -f`
+3. **Create an issue** in the GitHub repository
+4. **Contact the team** through GitHub discussions
+
+### 📋 Quick Reference
+```bash
+# Start development environment
+docker-compose -f docker-compose.dev.yml up -d --build
+
+# View logs
+docker-compose -f docker-compose.dev.yml logs -f
+
+# Stop everything
+docker-compose -f docker-compose.dev.yml down
+
+# Test backend health
+curl http://localhost:8080/api/auth/health
+
+# Access frontend
+open http://localhost:3000
+```
+
+---
+
+<div align="center">
+
+### Built with ❤️ for Bangladesh's Mental Health Community 🇧🇩
+
+**MindCare Connect** - Bridging the gap in mental health support through technology
+
+[![GitHub Stars](https://img.shields.io/github/stars/RaiZen094/MindCare?style=social)](https://github.com/RaiZen094/MindCare/stargazers)
+[![GitHub Forks](https://img.shields.io/github/forks/RaiZen094/MindCare?style=social)](https://github.com/RaiZen094/MindCare/network/members)
+[![GitHub Issues](https://img.shields.io/github/issues/RaiZen094/MindCare)](https://github.com/RaiZen094/MindCare/issues)
+
+**🚀 Quick Start** • **📖 Documentation** • **🐛 Report Issues** • **💡 Request Features**
+
+</div>
 
 ---
 
@@ -523,7 +803,43 @@ git push origin feature/your-feature
 
 ## 🚨 Troubleshooting
 
-### 🐳 Docker Issues
+### � CI/CD Pipeline Issues
+
+#### Build Failures
+```bash
+# Maven wrapper issues
+# Ensure mvnw has executable permissions
+chmod +x backend/mvnw
+
+# Java version issues
+# CI uses Java 21 - ensure compatibility
+```
+
+#### Deployment Issues
+```bash
+# Backend deployment (Render)
+# Check RENDER_API_KEY and RENDER_SERVICE_ID secrets
+# Verify service is running in Render dashboard
+
+# Frontend deployment (Vercel)
+# Check VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID secrets
+# Verify project exists in Vercel dashboard
+```
+
+#### Secret Configuration Issues
+```bash
+# Required GitHub Secrets:
+# - RENDER_API_KEY: From Render account settings
+# - RENDER_SERVICE_ID: From your Render service URL
+# - VERCEL_TOKEN: From Vercel account settings
+# - VERCEL_ORG_ID: From Vercel team settings
+# - VERCEL_PROJECT_ID: From Vercel project settings
+
+# Check secrets in GitHub repository:
+# Settings → Secrets and variables → Actions
+```
+
+### �🐳 Docker Issues
 
 #### Port Conflicts
 ```bash
