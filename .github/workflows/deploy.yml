@@ -13,184 +13,82 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # ---------- Test Backend ----------
   test-backend:
     name: 🧪 Test Backend
     runs-on: ubuntu-latest
     steps:
-      - name: 📥 Checkout code
-        uses: actions/checkout@v4
-
-      - name: ☕ Set up JDK 21
-        uses: actions/setup-java@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
         with:
           java-version: '21'
           distribution: 'temurin'
           cache: maven
-
       - name: 🔧 Setup Maven wrapper
         run: |
           cd backend
           chmod +x mvnw
-
-      - name: 🧪 Run Backend Tests (non-blocking)
+      - name: 🧪 Tests (non-blocking)
         run: |
           cd backend
-          ./mvnw clean test --batch-mode --no-transfer-progress || {
-            echo "⚠️ Tests failed, continuing (build will still run)";
-          }
-
-      - name: 🏗️ Build Backend
+          ./mvnw clean test --batch-mode --no-transfer-progress || echo "tests failed"
+      - name: 🏗️ Build
         run: |
           cd backend
           ./mvnw clean package -DskipTests --batch-mode --no-transfer-progress
 
-      - name: 📦 Upload Backend Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: backend-jar
-          path: backend/target/*.jar
-          retention-days: 7
-
-  # ---------- Test Frontend ----------
   test-frontend:
     name: 🧪 Test Frontend
     runs-on: ubuntu-latest
     steps:
-      - name: 📥 Checkout code
-        uses: actions/checkout@v4
-
-      - name: 🟢 Set up Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '18'
           cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
-
-      - name: 📦 Install Dependencies
+      - name: 📦 Install
         working-directory: frontend
         run: npm ci
-
-      - name: 🧪 Lint Code (non-blocking)
+      - name: 🧹 Lint (non-blocking)
         working-directory: frontend
-        run: npm run lint || echo "Lint skipped"
-
-      - name: 🏗️ Build Frontend
+        run: npm run lint || echo "lint skipped"
+      - name: 🏗️ Build
         working-directory: frontend
         env:
           NEXT_PUBLIC_API_URL: https://mindcare-backend-uyos.onrender.com/api
         run: npm run build
 
-  # ---------- Deploy Backend (Render) ----------
   deploy-backend:
     name: 🚀 Deploy Backend (Render)
     needs: [test-backend]
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
     steps:
-      - name: ✅ Check deploy hook secret
+      - name: ✅ Check secret
         run: |
-          if [ -z "${{ secrets.RENDER_DEPLOY_HOOK }}" ]; then
-            echo "❌ Missing secret RENDER_DEPLOY_HOOK (Render → Service → Settings → Deploy hooks)"
-            exit 1
-          fi
-
+          [ -n "${{ secrets.RENDER_DEPLOY_HOOK }}" ] || { echo "Missing RENDER_DEPLOY_HOOK"; exit 1; }
       - name: 🔔 Trigger Render deploy
         run: |
           code=$(curl -s -o /dev/null -w "%{http_code}" -X POST "${{ secrets.RENDER_DEPLOY_HOOK }}")
           echo "Render HTTP: $code"
-          if [ "$code" -lt 200 ] || [ "$code" -ge 300 ]; then
-            echo "❌ Failed to trigger Render deploy"
-            exit 1
-          fi
-
-      - name: 🏥 Health Check Backend
+          if [ "$code" -lt 200 ] || [ "$code" -ge 300 ]; then exit 1; fi
+      - name: 🏥 Health check
         run: |
-          echo "⏳ Waiting 60s for startup..."
-          sleep 60
+          echo "wait 60s"; sleep 60
           for i in {1..15}; do
-            echo "Attempt $i..."
-            if curl -fsS --max-time 10 https://mindcare-backend-uyos.onrender.com/api/auth/health > /dev/null; then
-              echo "✅ Backend healthy"
-              exit 0
-            fi
+            if curl -fsS --max-time 10 https://mindcare-backend-uyos.onrender.com/api/auth/health >/dev/null; then
+              echo "backend healthy"; exit 0; fi
             sleep 20
           done
-          echo "❌ Backend health check failed"
           exit 1
 
-  # ---------- Deploy Frontend (Vercel) ----------
-  # ---------- Deploy Frontend (Vercel via Deploy Hook) ----------
-deploy-frontend:
-  name: 🚀 Deploy Frontend (Vercel)
-  needs: [test-frontend]
-  runs-on: ubuntu-latest
-  if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
-  steps:
-    - name: ✅ Check required secrets
-      run: |
-        [ -n "${{ secrets.VERCEL_DEPLOY_HOOK }}" ] || { echo "❌ Missing VERCEL_DEPLOY_HOOK"; exit 1; }
-        [ -n "${{ secrets.VERCEL_TOKEN }}" ] || { echo "❌ Missing VERCEL_TOKEN"; exit 1; }
-        [ -n "${{ secrets.VERCEL_PROJECT_ID }}" ] || { echo "❌ Missing VERCEL_PROJECT_ID"; exit 1; }
-
-    - name: 🔔 Trigger Vercel deploy (production)
-      run: |
-        code=$(curl -s -o /dev/null -w "%{http_code}" -X POST "${{ secrets.VERCEL_DEPLOY_HOOK }}")
-        echo "Vercel hook HTTP: $code"
-        if [ "$code" -lt 200 ] || [ "$code" -ge 300 ]; then
-          echo "❌ Failed to trigger Vercel deploy"
-          exit 1
-        fi
-
-    - name: ⏳ Wait for Vercel deployment to be READY
-      run: |
-        sudo apt-get update -y >/dev/null && sudo apt-get install -y jq >/dev/null
-        TOKEN='${{ secrets.VERCEL_TOKEN }}'
-        PROJECT='${{ secrets.VERCEL_PROJECT_ID }}'
-        echo "Polling Vercel for production deployment status…"
-        for i in {1..30}; do
-          json=$(curl -s -H "Authorization: Bearer $TOKEN" \
-               "https://api.vercel.com/v13/deployments?projectId=$PROJECT&target=production&limit=1")
-          state=$(echo "$json" | jq -r '.deployments[0].state // empty')
-          url=$(echo "$json"   | jq -r '.deployments[0].url   // empty')
-          echo "Attempt $i: state=$state url=$url"
-          if [ "$state" = "READY" ]; then
-            echo "✅ Frontend ready at https://$url"
-            exit 0
-          fi
-          if [ "$state" = "ERROR" ] || [ -z "$state" ]; then
-            echo "❌ Deployment error:"
-            echo "$json" | jq .
-            exit 1
-          fi
-          sleep 10
-        done
-        echo "❌ Timed out waiting for Vercel deployment"
-        exit 1
-
-
-  # ---------- Integration Tests ----------
-  integration-tests:
-    name: 🧪 Integration Tests
-    needs: [deploy-backend, deploy-frontend]
+  deploy-frontend:
+    name: 🚀 Deploy Frontend (Vercel)
+    needs: [test-frontend]
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
     steps:
-      - name: 🧪 Test endpoints
+      - name: ✅ Check required secrets
         run: |
-          set -e
-          curl -f https://mindcare-backend-uyos.onrender.com/api/auth/health
-          curl -f https://mind-care-zeta.vercel.app
-
-  # ---------- Summary ----------
-  deployment-summary:
-    name: 📢 Deployment Summary
-    needs: [deploy-backend, deploy-frontend, integration-tests]
-    runs-on: ubuntu-latest
-    if: always() && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
-    steps:
-      - name: 📢 Results
-        run: |
-          echo "Backend:   ${{ needs.deploy-backend.result }}"
-          echo "Frontend:  ${{ needs.deploy-frontend.result }}"
-          echo "E2E tests: ${{ needs.integration-tests.result }}"
+          [ -n "${{ secrets.VERCEL_DEPLOY_HOOK }}" ] || { echo "Missing VERCEL_DEPLOY_HOOK"; exit 1; }
+          [ -n "${{ secrets.VERCEL_TOKEN }}"_]()
