@@ -100,24 +100,23 @@ jobs:
           echo "Vercel hook HTTP: $code"
           if [ "$code" -lt 200 ] || [ "$code" -ge 300 ]; then exit 1; fi
 
-      - name: ⏳ Wait for Vercel to be READY
+      - name: ⏳ Wait for Vercel (public URL health check)
         run: |
-          sudo apt-get update -y >/dev/null && sudo apt-get install -y jq >/dev/null
-          TOKEN='${{ secrets.VERCEL_TOKEN }}'
-          PROJECT='${{ secrets.VERCEL_PROJECT_ID }}'
-          for i in {1..30}; do
-            json=$(curl -s -H "Authorization: Bearer $TOKEN" \
-                   "https://api.vercel.com/v13/deployments?projectId=$PROJECT&target=production&limit=1")
-            state=$(echo "$json" | jq -r '.deployments[0].state // empty')
-            url=$(echo "$json"   | jq -r '.deployments[0].url   // empty')
-            echo "Attempt $i: state=$state url=$url"
-            if [ "$state" = "READY" ]; then
-              echo "Frontend ready: https://$url"; exit 0; fi
-            if [ "$state" = "ERROR" ] || [ -z "$state" ]; then
-              echo "$json" | jq .; exit 1; fi
-            sleep 10
-          done
-          echo "Timed out"; exit 1
+         URL="https://mind-care-zeta.vercel.app"   # <-- your prod URL
+         echo "Polling $URL until it responds…"
+         for i in {1..30}; do
+          # accept 200-399 (Vercel sometimes returns 308 first)
+          status=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "$URL")
+          echo "Attempt $i: HTTP $status"
+          if [ "$status" -ge 200 ] && [ "$status" -lt 400 ]; then
+            echo "✅ Frontend ready: $URL"
+            exit 0
+          fi
+          sleep 10
+         done
+         echo "❌ Timed out waiting for $URL"
+         exit 1
+
 
   integration-tests:
     name: 🧪 Integration
