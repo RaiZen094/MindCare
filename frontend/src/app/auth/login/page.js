@@ -8,6 +8,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { Eye, EyeOff, Lock, Mail, AlertCircle, CheckCircle } from 'lucide-react';
 import { useAuth } from '../../../contexts/AuthContext';
+import ColdStartLoader from '../../../components/ColdStartLoader';
 
 // Validation schema
 const loginSchema = yup.object({
@@ -23,7 +24,7 @@ const loginSchema = yup.object({
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login, isAuthenticated, loading: authLoading } = useAuth();
+  const { login, isAuthenticated, loading: authLoading, authLoading: loginLoading, coldStart } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [loginError, setLoginError] = useState('');
   const [loginSuccess, setLoginSuccess] = useState('');
@@ -72,6 +73,15 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 to-blue-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      {/* Cold Start Loader */}
+      <ColdStartLoader 
+        isVisible={coldStart && (loginLoading || isSubmitting)}
+        message="Authenticating with server..."
+        onTimeout={() => {
+          setLoginError('Connection timeout. Please try again or refresh the page.');
+        }}
+      />
+      
       <div className="max-w-md w-full space-y-8">
         {/* Header */}
         <div className="text-center">
@@ -97,11 +107,27 @@ export default function LoginPage() {
               </div>
             )}
 
+            {/* Cold Start Warning */}
+            {coldStart && (
+              <div className="flex items-center p-3 text-sm text-blue-700 bg-blue-100 rounded-lg">
+                <AlertCircle className="w-5 h-5 mr-2" />
+                <div>
+                  <p className="font-medium">Server Starting Up</p>
+                  <p className="text-xs">The backend is waking up. This may take up to 60 seconds for the first request.</p>
+                </div>
+              </div>
+            )}
+
             {/* Error Message */}
             {loginError && (
               <div className="flex items-center p-3 text-sm text-red-700 bg-red-100 rounded-lg">
                 <AlertCircle className="w-5 h-5 mr-2" />
-                {loginError}
+                <div>
+                  <p>{loginError}</p>
+                  {loginError.includes('starting up') && (
+                    <p className="text-xs mt-1">Please wait a moment and try again. Subsequent requests will be faster.</p>
+                  )}
+                </div>
               </div>
             )}
 
@@ -190,13 +216,13 @@ export default function LoginPage() {
             <div>
               <button
                 type="submit"
-                disabled={isSubmitting}
+                disabled={isSubmitting || loginLoading}
                 className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                {isSubmitting ? (
+                {isSubmitting || loginLoading ? (
                   <div className="flex items-center">
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Signing in...
+                    {coldStart ? 'Waking up server...' : 'Signing in...'}
                   </div>
                 ) : (
                   'Sign in'

@@ -9,6 +9,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @RestController
 @RequestMapping("/auth")
 @CrossOrigin(origins = {"http://localhost:3000", "https://mindcare-connect.vercel.app"})
@@ -68,7 +71,33 @@ public class AuthController {
     }
     
     @GetMapping("/health")
-    public ResponseEntity<String> healthCheck() {
-        return ResponseEntity.ok("MindCare Connect Authentication Service is running");
+    public ResponseEntity<Map<String, Object>> healthCheck() {
+        Map<String, Object> health = new HashMap<>();
+        health.put("status", "UP");
+        health.put("service", "MindCare Connect Authentication Service");
+        health.put("timestamp", java.time.Instant.now().toString());
+        health.put("version", "1.0.0");
+        
+        return ResponseEntity.ok(health);
+    }
+    
+    @GetMapping("/wake-up")
+    public ResponseEntity<Map<String, Object>> wakeUp() {
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "Service is awake and ready");
+        response.put("timestamp", java.time.Instant.now().toString());
+        response.put("coldStart", "completed");
+        
+        return ResponseEntity.ok(response);
+    }
+    
+    @GetMapping("/admin-check")
+    public ResponseEntity<Map<String, Object>> adminCheck() {
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("message", "Admin endpoint is accessible");
+        response.put("timestamp", java.time.Instant.now().toString());
+        
+        return ResponseEntity.ok(response);
     }
 }
