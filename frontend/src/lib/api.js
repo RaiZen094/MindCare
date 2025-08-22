@@ -1,7 +1,7 @@
 import axios from 'axios';
 import Cookies from 'js-cookie';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 2000; // 2 seconds
 const COLD_START_TIMEOUT = 60000; // 60 seconds for cold starts
@@ -100,28 +100,28 @@ export const apiService = {
   // Authentication methods with retry
   async login(credentials) {
     return apiWithRetry(async () => {
-      const response = await api.post('/auth/login', credentials);
+      const response = await api.post('/api/auth/login', credentials);
       return response.data;
     });
   },
 
   async register(userData) {
     return apiWithRetry(async () => {
-      const response = await api.post('/auth/register', userData);
+      const response = await api.post('/api/auth/register', userData);
       return response.data;
     });
   },
 
   async adminCheck() {
     return apiWithRetry(async () => {
-      const response = await api.get('/auth/admin-check');
+      const response = await api.get('/api/auth/admin-check');
       return response.data;
     });
   },
 
   // Health check with normal timeout (no retry needed)
   async healthCheck() {
-    const response = await api.get('/auth/health');
+    const response = await api.get('/api/auth/health');
     return response.data;
   },
 
@@ -135,6 +135,138 @@ export const apiService = {
       console.log('🔄 Backend is starting up...');
       return false;
     }
+  },
+
+  // Professional Verification API methods
+  async submitProfessionalApplication(applicationData) {
+    return apiWithRetry(async () => {
+      const response = await api.post('/api/pro/verification/apply', applicationData);
+      return response.data;
+    });
+  },
+
+  async getProfessionalVerificationStatus() {
+    return apiWithRetry(async () => {
+      const response = await api.get('/api/pro/verification/status');
+      return response.data;
+    });
+  },
+
+  async getMyVerificationStatus() {
+    return apiWithRetry(async () => {
+      const response = await api.get('/api/pro/verification/my-status');
+      return response.data;
+    });
+  },
+
+  async trackProfessionalApplication(correlationId) {
+    return apiWithRetry(async () => {
+      const response = await api.get(`/api/pro/verification/track/${correlationId}`);
+      return response.data;
+    });
+  },
+
+  // Document upload API
+  async uploadDocument(file, documentType) {
+    return apiWithRetry(async () => {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('documentType', documentType);
+      
+      const response = await api.post('/api/documents/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      return response.data;
+    });
+  },
+
+  // Admin Professional Verification API methods
+  async getPendingVerifications(page = 0, size = 10) {
+    return apiWithRetry(async () => {
+      const response = await api.get(`/api/admin/verifications/pending?page=${page}&size=${size}`);
+      return response.data;
+    });
+  },
+
+  async getAllVerifications(status = null, page = 0, size = 10) {
+    return apiWithRetry(async () => {
+      const params = new URLSearchParams({ page, size });
+      if (status) params.append('status', status);
+      const response = await api.get(`/api/admin/verifications?${params}`);
+      return response.data;
+    });
+  },
+
+  async approveVerification(verificationId, notes = '') {
+    return apiWithRetry(async () => {
+      const response = await api.post(`/api/admin/verifications/${verificationId}/approve`, { notes });
+      return response.data;
+    });
+  },
+
+  async rejectVerification(verificationId, reason, notes = '') {
+    return apiWithRetry(async () => {
+      const response = await api.post(`/api/admin/verifications/${verificationId}/reject`, { reason, notes });
+      return response.data;
+    });
+  },
+
+  async getVerificationStatistics() {
+    return apiWithRetry(async () => {
+      const response = await api.get('/api/admin/verifications/statistics');
+      return response.data;
+    });
+  },
+
+  async uploadPreVerifiedCSV(file) {
+    return apiWithRetry(async () => {
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      const response = await api.post('/api/admin/verifications/upload-csv', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      return response.data;
+    });
+  },
+
+  // Get all verified professionals directory
+  async getAllProfessionals(page = 0, size = 20, search = '', professionalType = '') {
+    return apiWithRetry(async () => {
+      const params = new URLSearchParams({ page, size });
+      if (search) params.append('search', search);
+      if (professionalType) params.append('professionalType', professionalType);
+      const response = await api.get(`/api/admin/professionals?${params}`);
+      return response.data;
+    });
+  },
+
+  // Get pre-approved professionals reference list
+  async getPreApprovedProfessionals(email = '', name = '', type = '', specialization = '') {
+    return apiWithRetry(async () => {
+      const params = new URLSearchParams();
+      if (email) params.append('email', email);
+      if (name) params.append('name', name);
+      if (type) params.append('type', type);
+      if (specialization) params.append('specialization', specialization);
+      
+      const url = '/api/admin/pre-approved-professionals' + 
+                 (params.toString() ? '?' + params.toString() : '');
+      const response = await api.get(url);
+      return response.data;
+    });
+  },
+
+  // Generic get method for backward compatibility
+  async get(endpoint) {
+    return apiWithRetry(async () => {
+      const response = await api.get(`/api${endpoint}`);
+      return response;
+    });
   }
 };
 

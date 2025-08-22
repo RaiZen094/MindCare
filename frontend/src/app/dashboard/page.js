@@ -84,6 +84,55 @@ export default function Dashboard() {
             </p>
           </div>
 
+          {/* Professional Verification Status for Non-Professionals */}
+          {!isProfessional() && !isAdmin() && (
+            <div className="mb-6 bg-gradient-to-r from-teal-50 to-blue-50 rounded-lg shadow p-6 border-l-4 border-teal-400">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    Become a Verified Professional
+                  </h3>
+                  <p className="text-gray-600 mb-4">
+                    Are you a mental health professional? Join our platform as a verified practitioner 
+                    and help patients on their mental health journey.
+                  </p>
+                  <div className="flex items-center space-x-4">
+                    <Link 
+                      href="/professional/apply"
+                      className="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 transition-colors"
+                    >
+                      Apply for Verification
+                    </Link>
+                    <Link 
+                      href="/professional/status"
+                      className="px-4 py-2 text-teal-600 border border-teal-600 rounded-md hover:bg-teal-50 transition-colors"
+                    >
+                      Check Application Status
+                    </Link>
+                  </div>
+                </div>
+                <div className="hidden md:block">
+                  <Shield className="w-16 h-16 text-teal-400" />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Professional Verification Status for Professionals */}
+          {isProfessional() && (
+            <div className="mb-6 bg-green-50 rounded-lg shadow p-6 border-l-4 border-green-400">
+              <div className="flex items-center">
+                <CheckCircle className="w-6 h-6 text-green-500 mr-3" />
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">Verified Professional</h3>
+                  <p className="text-gray-600">
+                    You are a verified mental health professional on our platform.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Account Status */}
           <div className="mb-6 bg-white rounded-lg shadow p-6">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Account Status</h2>
@@ -217,12 +266,22 @@ export default function Dashboard() {
                   </div>
                 </Link>
 
-                <Link href="/admin/professionals" className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow">
+                <Link href="/admin/verifications" className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow">
                   <div className="flex items-center">
                     <Shield className="w-8 h-8 text-green-600 mr-3" />
                     <div>
                       <h3 className="font-semibold text-gray-900">Verify Professionals</h3>
                       <p className="text-sm text-gray-600">Approve applications</p>
+                    </div>
+                  </div>
+                </Link>
+
+                <Link href="/admin/professionals" className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow">
+                  <div className="flex items-center">
+                    <Users className="w-8 h-8 text-purple-600 mr-3" />
+                    <div>
+                      <h3 className="font-semibold text-gray-900">Professionals Directory</h3>
+                      <p className="text-sm text-gray-600">View all verified professionals</p>
                     </div>
                   </div>
                 </Link>

@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Remove standalone output for Vercel (use default)
-  // output: 'standalone', // Comment out for Vercel deployment
+  // Enable standalone output for Docker deployment
+  output: 'standalone',
   
   // Image optimization for production
   images: {
@@ -10,7 +10,7 @@ const nextConfig = {
   
   // Environment variables
   env: {
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api',
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080',
   },
   
   // Experimental features
