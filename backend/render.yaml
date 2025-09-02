@@ -30,6 +30,12 @@ services:
         value: "http://localhost:3000,https://mind-care-zeta.vercel.app,https://mind-care-git-master-raiyanfzs845-3659s-projects.vercel.app"
       - key: PORT
         value: "8080"
+      - key: APP_BASE_URL
+        value: "https://mindcare-backend.render.com/api"
+      - key: STORAGE_LOCAL_PATH
+        value: "/tmp/uploads"
+      - key: STORAGE_MAX_FILE_SIZE
+        value: "10485760"
 
 databases:
   - name: mindcare-database

@@ -3,6 +3,8 @@ package com.mindcare.connect.service;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -19,16 +21,22 @@ import java.util.UUID;
 @Service
 public class DocumentService {
 
-    @Value("${app.base-url:http://localhost:8080/api}")
+    private static final Logger logger = LoggerFactory.getLogger(DocumentService.class);
+
+    @Value("${app.base-url:${APP_BASE_URL:http://localhost:8080/api}}")
     private String baseUrl;
 
-    @Value("${storage.local.path:./uploads}")
+    @Value("${storage.local.path:${STORAGE_LOCAL_PATH:./uploads}}")
     private String localStoragePath;
 
-    @Value("${storage.max-file-size:10485760}") // 10MB default
+    @Value("${storage.max-file-size:${STORAGE_MAX_FILE_SIZE:10485760}}")
     private long maxFileSize;
 
     private static final String[] ALLOWED_EXTENSIONS = {".pdf", ".jpg", ".jpeg", ".png", ".doc", ".docx"};
+
+    public DocumentService() {
+        logger.info("DocumentService initialized successfully");
+    }
 
     /**
      * Upload document and return signed URL
