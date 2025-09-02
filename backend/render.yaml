@@ -7,7 +7,7 @@ services:
     plan: free
     buildCommand: ""
     startCommand: "java -jar app.jar"
-    healthCheckPath: "/api/public/health"
+    healthCheckPath: "/health"
     port: 8080
     envVars:
       - key: SPRING_PROFILES_ACTIVE
