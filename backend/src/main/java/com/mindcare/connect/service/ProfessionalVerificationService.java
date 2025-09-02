@@ -72,6 +72,13 @@ public class ProfessionalVerificationService {
                 if (existing.getStatus() == VerificationStatus.APPROVED) {
                     throw new RuntimeException("You are already a verified professional");
                 }
+                // If status is REJECTED or REVOKED, allow reapplication by deleting the old one
+                if (existing.getStatus() == VerificationStatus.REJECTED || 
+                    existing.getStatus() == VerificationStatus.REVOKED) {
+                    log.info("Deleting previous {} application for user {} to allow reapplication", 
+                             existing.getStatus(), userId);
+                    verificationRepository.delete(existing);
+                }
             }
 
             // Validate request based on professional type
@@ -113,39 +120,30 @@ public class ProfessionalVerificationService {
             verification = verificationRepository.save(verification);
             log.info("Verification application saved with ID: {}", verification.getId());
 
-            // Run auto-verification agent
+            // Calculate AI confidence for admin assistance
             try {
-                AutoVerificationResult autoResult = autoVerificationAgent.processApplication(verification);
+                ConfidenceResult confidenceResult = autoVerificationAgent.calculateConfidence(verification);
                 
-                if (autoResult.isApproved()) {
-                    // Auto-approve the application
-                    verification.setStatus(VerificationStatus.APPROVED);
-                    verification.setAdminNotes(autoResult.getReason() + 
-                        String.format(" (Auto-approved with %.1f%% confidence)", autoResult.getConfidence() * 100));
-                    verification.setVerifiedAt(LocalDateTime.now());
-                    
-                    // Add PROFESSIONAL role to user
-                    user.getRoles().add(Role.PROFESSIONAL);
-                    userRepository.save(user);
-                    
-                    log.info("Application auto-approved for user: {} with confidence: {}", 
-                           user.getEmail(), autoResult.getConfidence());
-                } else {
-                    // Keep as PENDING for manual review
-                    verification.setAdminNotes(autoResult.getReason() + 
-                        String.format(" (Auto-verification confidence: %.1f%%)", autoResult.getConfidence() * 100));
-                    
-                    log.info("Application flagged for manual review: {} - {}", 
-                           user.getEmail(), autoResult.getReason());
-                }
+                // Update verification with AI confidence data
+                verification.updateAiConfidence(
+                    confidenceResult.getConfidence(),
+                    confidenceResult.getRecommendation(),
+                    confidenceResult.getMatchDetails()
+                );
                 
-                // Save final verification status
+                log.info("AI confidence calculated for application {}: {:.1f}% - {}", 
+                        verification.getId(), 
+                        confidenceResult.getConfidence() * 100,
+                        confidenceResult.getRecommendation());
+                
+                // Save with confidence data
                 verification = verificationRepository.save(verification);
                 
             } catch (Exception e) {
-                log.error("Auto-verification failed for application {}: {}", verification.getId(), e.getMessage());
-                // Keep application as PENDING for manual review
-                verification.setAdminNotes("Auto-verification failed, requires manual review: " + e.getMessage());
+                log.error("AI confidence calculation failed for application {}: {}", verification.getId(), e.getMessage());
+                // Continue without confidence - application will be manually reviewed
+                verification.updateAiConfidence(0.0, "⚫ AI PROCESSING FAILED - Manual review required", 
+                    "Error during AI processing: " + e.getMessage());
                 verification = verificationRepository.save(verification);
             }
 
@@ -489,6 +487,12 @@ public class ProfessionalVerificationService {
         response.setCorrelationId(verification.getCorrelationId());
         response.setCreatedAt(verification.getCreatedAt());
         response.setUpdatedAt(verification.getUpdatedAt());
+
+        // Add AI confidence fields
+        response.setAiConfidenceScore(verification.getAiConfidenceScore());
+        response.setAiRecommendation(verification.getAiRecommendation());
+        response.setAiMatchDetails(verification.getAiMatchDetails());
+        response.setAiProcessedAt(verification.getAiProcessedAt());
 
         // Get admin name if available
         if (verification.getVerifiedByAdminId() != null) {

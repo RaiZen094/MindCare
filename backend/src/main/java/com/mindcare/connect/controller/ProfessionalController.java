@@ -67,19 +67,33 @@ public class ProfessionalController {
     @PreAuthorize("hasRole('PATIENT') or hasRole('PROFESSIONAL')")
     public ResponseEntity<?> getVerificationStatus(HttpServletRequest httpRequest) {
         try {
+            System.out.println("=== DEBUG: Getting verification status ===");
+            String authHeader = httpRequest.getHeader("Authorization");
+            System.out.println("Authorization header present: " + (authHeader != null));
+            
             Long userId = extractUserIdFromRequest(httpRequest);
+            System.out.println("Extracted userId: " + userId);
+            
             if (userId == null) {
+                System.err.println("Failed to extract userId from token");
                 return ResponseEntity.status(401).body("Unauthorized: Invalid token");
             }
 
             Optional<ProfessionalVerificationResponse> status = verificationService.getApplicationStatus(userId);
+            System.out.println("Application status found: " + status.isPresent());
+            
             if (status.isPresent()) {
+                System.out.println("Returning application: " + status.get().getCorrelationId());
                 return ResponseEntity.ok(status.get());
             } else {
-                return ResponseEntity.ok("No verification application found");
+                System.out.println("No verification application found for userId: " + userId);
+                // Return null instead of string to make frontend handle it properly
+                return ResponseEntity.ok().body(null);
             }
 
         } catch (Exception e) {
+            System.err.println("Error in getVerificationStatus: " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.badRequest().body("Failed to get status: " + e.getMessage());
         }
     }
@@ -120,11 +134,15 @@ public class ProfessionalController {
                 String token = authHeader.substring(7);
                 String email = jwtService.extractUsername(token);
                 
-                // Extract userId from token claims
-                return jwtService.extractClaim(token, claims -> claims.get("userId", Long.class));
+                // Extract userId from token claims - handle both Integer and Long types
+                Object userIdClaim = jwtService.extractClaim(token, claims -> claims.get("userId"));
+                if (userIdClaim instanceof Number) {
+                    return ((Number) userIdClaim).longValue();
+                }
             }
             return null;
         } catch (Exception e) {
+            System.err.println("Error extracting user ID from token: " + e.getMessage());
             return null;
         }
     }

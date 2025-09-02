@@ -49,6 +49,14 @@ public interface PreApprovedProfessionalRepository extends JpaRepository<PreAppr
     List<PreApprovedProfessional> findByDegreeAndInstitutionAndProfessionalType(@Param("degreeTitle") String degreeTitle,
                                                                                @Param("institution") String institution,
                                                                                @Param("type") ProfessionalType type);
+
+    // Fuzzy matching for degrees (for confidence calculation)
+    @Query("SELECT p FROM PreApprovedProfessional p WHERE LOWER(p.degreeTitle) LIKE LOWER(CONCAT('%', :degree, '%')) AND p.professionalType = :type")
+    List<PreApprovedProfessional> findByDegreeContainingAndProfessionalType(@Param("degree") String degree, @Param("type") ProfessionalType type);
+
+    // Fuzzy matching for BMDC (broader search)
+    @Query("SELECT p FROM PreApprovedProfessional p WHERE p.bmdcNumber LIKE %:bmdcNumber% AND p.professionalType = 'PSYCHIATRIST'")
+    List<PreApprovedProfessional> findByBmdcNumberContaining(@Param("bmdcNumber") String bmdcNumber);
     
     // Get all ordered by upload date
     List<PreApprovedProfessional> findAllByOrderByUploadedAtDesc();

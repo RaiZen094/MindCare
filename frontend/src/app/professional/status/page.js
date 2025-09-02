@@ -27,6 +27,7 @@ export default function VerificationStatus() {
   
   const [verification, setVerification] = useState(null);
   const [loadingData, setLoadingData] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
@@ -41,11 +42,44 @@ export default function VerificationStatus() {
 
   const fetchVerificationStatus = async () => {
     setLoadingData(true);
+    setError(null);
     try {
+      console.log('🔍 Fetching verification status...');
       const response = await apiService.getMyVerificationStatus();
-      setVerification(response);
+      console.log('✅ Status response:', response);
+      
+      // Handle null response (no application found)
+      if (response === null || response === undefined) {
+        console.log('📝 No application found, setting verification to null');
+        setVerification(null);
+      } else {
+        setVerification(response);
+      }
     } catch (error) {
-      console.error('Error fetching verification status:', error);
+      console.error('❌ Error fetching verification status:', error);
+      console.error('Error details:', {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message
+      });
+      
+      // If it's a 404 or "not found" error, treat it as no application
+      if (error.response?.status === 404 || 
+          error.response?.data?.includes?.('not found') || 
+          error.message?.includes?.('not found')) {
+        console.log('📝 Treating error as no application found');
+        setVerification(null);
+      } else if (error.response?.status === 401 || error.response?.status === 403) {
+        // Authentication error
+        console.error('🔐 Authentication error, redirecting to login');
+        setError('Authentication failed. Please log in again.');
+        router.push('/auth/login');
+      } else {
+        // For other errors, show error state
+        console.error('🚨 Unexpected error occurred');
+        setError('Failed to load verification status. Please try again.');
+        setVerification(null);
+      }
     } finally {
       setLoadingData(false);
     }
@@ -117,6 +151,38 @@ export default function VerificationStatus() {
         {loadingData ? (
           <div className="bg-white shadow-lg rounded-lg p-8 text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600 mx-auto"></div>
+            <p className="mt-4 text-gray-600">Loading verification status...</p>
+          </div>
+        ) : error ? (
+          /* Error State */
+          <div className="bg-white shadow-lg rounded-lg p-8 text-center">
+            <div className="mb-6">
+              <div className="mx-auto h-24 w-24 bg-red-100 rounded-full flex items-center justify-center mb-4">
+                <span className="text-4xl text-red-500">⚠️</span>
+              </div>
+              <h2 className="text-2xl font-semibold text-gray-900 mb-2">
+                Error Loading Status
+              </h2>
+              <p className="text-red-600 mb-6">
+                {error}
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              <button
+                onClick={fetchVerificationStatus}
+                className="w-full sm:w-auto px-6 py-3 bg-teal-600 text-white rounded-md hover:bg-teal-700 transition-colors font-medium"
+              >
+                Try Again
+              </button>
+              
+              <button
+                onClick={() => router.push('/dashboard')}
+                className="w-full sm:w-auto px-6 py-3 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors font-medium ml-4"
+              >
+                Go to Dashboard
+              </button>
+            </div>
           </div>
         ) : verification ? (
           <div className="space-y-6">
@@ -301,7 +367,7 @@ export default function VerificationStatus() {
                     onClick={() => router.push('/professional/apply')}
                     className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
                   >
-                    Submit New Application
+                    Apply Again
                   </button>
                 )}
 

@@ -134,7 +134,7 @@ export default function RegisterPage() {
             {/* Name Fields */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="firstName" className="block text-sm font-semibold text-gray-800 mb-1">
                   First Name
                 </label>
                 <div className="relative">
@@ -145,41 +145,41 @@ export default function RegisterPage() {
                     id="firstName"
                     type="text"
                     autoComplete="given-name"
-                    className={`block w-full pl-10 pr-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 ${
+                    className={`block w-full pl-10 pr-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-gray-900 placeholder-gray-500 ${
                       errors.firstName ? 'border-red-300' : 'border-gray-300'
                     }`}
-                    placeholder="First name"
+                    placeholder="Enter first name"
                     {...register('firstName')}
                   />
                 </div>
                 {errors.firstName && (
-                  <p className="mt-1 text-sm text-red-600">{errors.firstName.message}</p>
+                  <p className="mt-1 text-sm text-red-600 font-medium">{errors.firstName.message}</p>
                 )}
               </div>
 
               <div>
-                <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="lastName" className="block text-sm font-semibold text-gray-800 mb-1">
                   Last Name
                 </label>
                 <input
                   id="lastName"
                   type="text"
                   autoComplete="family-name"
-                  className={`block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 ${
+                  className={`block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-gray-900 placeholder-gray-500 ${
                     errors.lastName ? 'border-red-300' : 'border-gray-300'
                   }`}
-                  placeholder="Last name"
+                  placeholder="Enter last name"
                   {...register('lastName')}
                 />
                 {errors.lastName && (
-                  <p className="mt-1 text-sm text-red-600">{errors.lastName.message}</p>
+                  <p className="mt-1 text-sm text-red-600 font-medium">{errors.lastName.message}</p>
                 )}
               </div>
             </div>
 
             {/* Email Field */}
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="email" className="block text-sm font-semibold text-gray-800 mb-1">
                 Email Address
               </label>
               <div className="relative">
@@ -190,22 +190,22 @@ export default function RegisterPage() {
                   id="email"
                   type="email"
                   autoComplete="email"
-                  className={`block w-full pl-10 pr-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 ${
+                  className={`block w-full pl-10 pr-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-gray-900 placeholder-gray-500 ${
                     errors.email ? 'border-red-300' : 'border-gray-300'
                   }`}
-                  placeholder="Enter your email"
+                  placeholder="Enter your email address"
                   {...register('email')}
                 />
               </div>
               {errors.email && (
-                <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
+                <p className="mt-1 text-sm text-red-600 font-medium">{errors.email.message}</p>
               )}
             </div>
 
             {/* Phone Field */}
             <div>
-              <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
-                Phone Number (Optional)
+              <label htmlFor="phone" className="block text-sm font-semibold text-gray-800 mb-1">
+                Phone Number <span className="text-gray-600 font-normal">(Optional)</span>
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -215,21 +215,21 @@ export default function RegisterPage() {
                   id="phone"
                   type="tel"
                   autoComplete="tel"
-                  className={`block w-full pl-10 pr-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 ${
+                  className={`block w-full pl-10 pr-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-gray-900 placeholder-gray-500 ${
                     errors.phone ? 'border-red-300' : 'border-gray-300'
                   }`}
-                  placeholder="+8801XXXXXXXXX"
+                  placeholder="e.g., +8801XXXXXXXXX"
                   {...register('phone')}
                 />
               </div>
               {errors.phone && (
-                <p className="mt-1 text-sm text-red-600">{errors.phone.message}</p>
+                <p className="mt-1 text-sm text-red-600 font-medium">{errors.phone.message}</p>
               )}
             </div>
 
             {/* Password Field */}
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="password" className="block text-sm font-semibold text-gray-800 mb-1">
                 Password
               </label>
               <div className="relative">
@@ -240,10 +240,10 @@ export default function RegisterPage() {
                   id="password"
                   type={showPassword ? 'text' : 'password'}
                   autoComplete="new-password"
-                  className={`block w-full pl-10 pr-10 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 ${
+                  className={`block w-full pl-10 pr-10 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-gray-900 placeholder-gray-500 ${
                     errors.password ? 'border-red-300' : 'border-gray-300'
                   }`}
-                  placeholder="Create a password"
+                  placeholder="Create a strong password"
                   {...register('password')}
                 />
                 <button
@@ -259,13 +259,13 @@ export default function RegisterPage() {
                 </button>
               </div>
               {errors.password && (
-                <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
+                <p className="mt-1 text-sm text-red-600 font-medium">{errors.password.message}</p>
               )}
             </div>
 
             {/* Confirm Password Field */}
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="confirmPassword" className="block text-sm font-semibold text-gray-800 mb-1">
                 Confirm Password
               </label>
               <div className="relative">
@@ -276,10 +276,10 @@ export default function RegisterPage() {
                   id="confirmPassword"
                   type={showConfirmPassword ? 'text' : 'password'}
                   autoComplete="new-password"
-                  className={`block w-full pl-10 pr-10 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 ${
+                  className={`block w-full pl-10 pr-10 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-gray-900 placeholder-gray-500 ${
                     errors.confirmPassword ? 'border-red-300' : 'border-gray-300'
                   }`}
-                  placeholder="Confirm your password"
+                  placeholder="Re-enter your password"
                   {...register('confirmPassword')}
                 />
                 <button
@@ -295,7 +295,7 @@ export default function RegisterPage() {
                 </button>
               </div>
               {errors.confirmPassword && (
-                <p className="mt-1 text-sm text-red-600">{errors.confirmPassword.message}</p>
+                <p className="mt-1 text-sm text-red-600 font-medium">{errors.confirmPassword.message}</p>
               )}
             </div>
 
@@ -310,20 +310,20 @@ export default function RegisterPage() {
                 />
               </div>
               <div className="ml-3 text-sm">
-                <label htmlFor="agreeToTerms" className="text-gray-700">
+                <label htmlFor="agreeToTerms" className="text-gray-800">
                   I agree to the{' '}
-                  <Link href="/terms" className="text-teal-600 hover:text-teal-500">
+                  <Link href="/terms" className="font-semibold text-teal-600 hover:text-teal-500">
                     Terms and Conditions
                   </Link>{' '}
                   and{' '}
-                  <Link href="/privacy" className="text-teal-600 hover:text-teal-500">
+                  <Link href="/privacy" className="font-semibold text-teal-600 hover:text-teal-500">
                     Privacy Policy
                   </Link>
                 </label>
               </div>
             </div>
             {errors.agreeToTerms && (
-              <p className="text-sm text-red-600">{errors.agreeToTerms.message}</p>
+              <p className="text-sm text-red-600 font-medium">{errors.agreeToTerms.message}</p>
             )}
 
             {/* Newsletter Subscription */}
@@ -334,8 +334,8 @@ export default function RegisterPage() {
                 className="focus:ring-teal-500 h-4 w-4 text-teal-600 border-gray-300 rounded"
                 {...register('subscribeToNewsletter')}
               />
-              <label htmlFor="subscribeToNewsletter" className="ml-3 text-sm text-gray-700">
-                Subscribe to our mental health newsletter (optional)
+              <label htmlFor="subscribeToNewsletter" className="ml-3 text-sm text-gray-800">
+                Subscribe to our mental health newsletter <span className="text-gray-600">(optional)</span>
               </label>
             </div>
 
@@ -360,9 +360,9 @@ export default function RegisterPage() {
 
           {/* Login Link */}
           <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-700">
               Already have an account?{' '}
-              <Link href="/auth/login" className="font-medium text-teal-600 hover:text-teal-500">
+              <Link href="/auth/login" className="font-semibold text-teal-600 hover:text-teal-500">
                 Sign in here
               </Link>
             </p>

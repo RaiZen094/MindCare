@@ -133,7 +133,7 @@ export default function LoginPage() {
 
             {/* Email Field */}
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="email" className="block text-sm font-semibold text-gray-800 mb-1">
                 Email Address
               </label>
               <div className="relative">
@@ -144,21 +144,21 @@ export default function LoginPage() {
                   id="email"
                   type="email"
                   autoComplete="email"
-                  className={`block w-full pl-10 pr-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 ${
+                  className={`block w-full pl-10 pr-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-gray-900 placeholder-gray-500 ${
                     errors.email ? 'border-red-300' : 'border-gray-300'
                   }`}
-                  placeholder="Enter your email"
+                  placeholder="Enter your email address"
                   {...register('email')}
                 />
               </div>
               {errors.email && (
-                <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
+                <p className="mt-1 text-sm text-red-600 font-medium">{errors.email.message}</p>
               )}
             </div>
 
             {/* Password Field */}
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="password" className="block text-sm font-semibold text-gray-800 mb-1">
                 Password
               </label>
               <div className="relative">
@@ -169,7 +169,7 @@ export default function LoginPage() {
                   id="password"
                   type={showPassword ? 'text' : 'password'}
                   autoComplete="current-password"
-                  className={`block w-full pl-10 pr-10 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 ${
+                  className={`block w-full pl-10 pr-10 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-gray-900 placeholder-gray-500 ${
                     errors.password ? 'border-red-300' : 'border-gray-300'
                   }`}
                   placeholder="Enter your password"
@@ -188,7 +188,7 @@ export default function LoginPage() {
                 </button>
               </div>
               {errors.password && (
-                <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
+                <p className="mt-1 text-sm text-red-600 font-medium">{errors.password.message}</p>
               )}
             </div>
 
@@ -201,12 +201,12 @@ export default function LoginPage() {
                   className="h-4 w-4 text-teal-600 focus:ring-teal-500 border-gray-300 rounded"
                   {...register('rememberMe')}
                 />
-                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
+                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-800 font-medium">
                   Remember me
                 </label>
               </div>
               <div className="text-sm">
-                <Link href="/auth/forgot-password" className="font-medium text-teal-600 hover:text-teal-500">
+                <Link href="/auth/forgot-password" className="font-semibold text-teal-600 hover:text-teal-500">
                   Forgot your password?
                 </Link>
               </div>
@@ -233,9 +233,9 @@ export default function LoginPage() {
 
           {/* Register Link */}
           <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-700">
               Don't have an account?{' '}
-              <Link href="/auth/register" className="font-medium text-teal-600 hover:text-teal-500">
+              <Link href="/auth/register" className="font-semibold text-teal-600 hover:text-teal-500">
                 Sign up here
               </Link>
             </p>

@@ -81,12 +81,23 @@ export default function ProfessionalApplicationPage() {
 
   const fetchApplicationStatus = async () => {
     try {
-      const response = await apiService.getProfessionalVerificationStatus();
+      console.log('🔍 Fetching application status in apply page...');
+      const response = await apiService.getMyVerificationStatus();
+      console.log('✅ Apply page response:', response);
       if (response && typeof response === 'object' && response.id) {
         setCurrentApplication(response);
       }
     } catch (error) {
-      console.error('Error fetching application status:', error);
+      console.error('❌ Error fetching application status:', error);
+      console.error('Error details:', {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message
+      });
+      // If error is 404 or no application found, it's expected
+      if (error.response?.status !== 404) {
+        console.error('Unexpected error:', error);
+      }
     }
   };
 
@@ -268,10 +279,12 @@ export default function ProfessionalApplicationPage() {
               </h1>
               <div className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-medium ${
                 currentApplication.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
+                currentApplication.status === 'UNDER_REVIEW' ? 'bg-blue-100 text-blue-800' :
                 currentApplication.status === 'APPROVED' ? 'bg-green-100 text-green-800' :
                 'bg-red-100 text-red-800'
               }`}>
                 {currentApplication.status === 'PENDING' && '⏳ Under Review'}
+                {currentApplication.status === 'UNDER_REVIEW' && '👀 Under Review'}
                 {currentApplication.status === 'APPROVED' && '✅ Approved'}
                 {currentApplication.status === 'REJECTED' && '❌ Rejected'}
               </div>
@@ -280,30 +293,30 @@ export default function ProfessionalApplicationPage() {
             <div className="space-y-6">
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Application ID</label>
+                  <label className="block text-sm font-medium text-gray-800">Application ID</label>
                   <p className="mt-1 text-sm text-gray-900 font-mono">{currentApplication.correlationId}</p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Professional Type</label>
+                  <label className="block text-sm font-medium text-gray-800">Professional Type</label>
                   <p className="mt-1 text-sm text-gray-900">{currentApplication.professionalType}</p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Specialization</label>
+                  <label className="block text-sm font-medium text-gray-800">Specialization</label>
                   <p className="mt-1 text-sm text-gray-900">{currentApplication.specialization}</p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Experience</label>
+                  <label className="block text-sm font-medium text-gray-800">Experience</label>
                   <p className="mt-1 text-sm text-gray-900">{currentApplication.experienceYears} years</p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Submitted On</label>
+                  <label className="block text-sm font-medium text-gray-800">Submitted On</label>
                   <p className="mt-1 text-sm text-gray-900">
                     {new Date(currentApplication.createdAt).toLocaleDateString()}
                   </p>
                 </div>
                 {currentApplication.verifiedAt && (
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">
+                    <label className="block text-sm font-medium text-gray-800">
                       {currentApplication.status === 'APPROVED' ? 'Approved On' : 'Reviewed On'}
                     </label>
                     <p className="mt-1 text-sm text-gray-900">
@@ -315,8 +328,8 @@ export default function ProfessionalApplicationPage() {
 
               {currentApplication.adminNotes && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Admin Notes</label>
-                  <p className="mt-1 text-sm text-gray-900 p-3 bg-gray-50 rounded-md">
+                  <label className="block text-sm font-medium text-gray-800">Admin Notes</label>
+                  <p className="mt-1 text-sm text-gray-900 p-3 bg-blue-50 rounded-md border border-blue-200">
                     {currentApplication.adminNotes}
                   </p>
                 </div>
@@ -324,8 +337,8 @@ export default function ProfessionalApplicationPage() {
 
               {currentApplication.rejectionReason && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Rejection Reason</label>
-                  <p className="mt-1 text-sm text-red-900 p-3 bg-red-50 rounded-md">
+                  <label className="block text-sm font-medium text-gray-800">Rejection Reason</label>
+                  <p className="mt-1 text-sm text-red-800 p-3 bg-red-50 rounded-md border border-red-200">
                     {currentApplication.rejectionReason}
                   </p>
                 </div>
@@ -337,12 +350,20 @@ export default function ProfessionalApplicationPage() {
                     onClick={() => setCurrentApplication(null)}
                     className="bg-teal-600 text-white px-6 py-2 rounded-md hover:bg-teal-700 transition-colors"
                   >
-                    Submit New Application
+                    Apply Again
+                  </button>
+                )}
+                {currentApplication.status === 'APPROVED' && (
+                  <button
+                    onClick={() => router.push('/professional')}
+                    className="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 transition-colors mr-4"
+                  >
+                    Go to Professional Dashboard
                   </button>
                 )}
                 <button
                   onClick={() => router.push('/dashboard')}
-                  className="ml-4 bg-gray-600 text-white px-6 py-2 rounded-md hover:bg-gray-700 transition-colors"
+                  className="bg-gray-600 text-white px-6 py-2 rounded-md hover:bg-gray-700 transition-colors"
                 >
                   Back to Dashboard
                 </button>
@@ -393,20 +414,20 @@ export default function ProfessionalApplicationPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-800 mb-1">
                     Professional Type *
                   </label>
                   <select
                     name="professionalType"
                     value={applicationData.professionalType}
                     onChange={handleInputChange}
-                    className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 ${
+                    className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 text-gray-900 bg-white ${
                       errors.professionalType ? 'border-red-500' : 'border-gray-300'
                     }`}
                   >
-                    <option value="">Select professional type</option>
+                    <option value="" className="text-gray-500">Select professional type</option>
                     {PROFESSIONAL_TYPES.map(type => (
-                      <option key={type.value} value={type.value}>
+                      <option key={type.value} value={type.value} className="text-gray-900">
                         {type.label}
                       </option>
                     ))}
@@ -415,7 +436,7 @@ export default function ProfessionalApplicationPage() {
                     <p className="mt-1 text-sm text-red-600">{errors.professionalType}</p>
                   )}
                   {applicationData.professionalType && (
-                    <p className="mt-1 text-sm text-gray-500">
+                    <p className="mt-1 text-sm text-gray-600">
                       {PROFESSIONAL_TYPES.find(t => t.value === applicationData.professionalType)?.description}
                     </p>
                   )}
@@ -429,7 +450,7 @@ export default function ProfessionalApplicationPage() {
               <div className="grid md:grid-cols-2 gap-6">
                 {applicationData.professionalType === 'PSYCHIATRIST' && (
                   <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-800 mb-1">
                       BMDC Registration Number *
                     </label>
                     <input
@@ -438,11 +459,11 @@ export default function ProfessionalApplicationPage() {
                       value={applicationData.bmdcNumber}
                       onChange={handleInputChange}
                       placeholder="Enter your BMDC registration number (e.g., BMDC-12345)"
-                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 ${
+                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 text-gray-900 bg-white placeholder-gray-400 ${
                         errors.bmdcNumber ? 'border-red-500' : 'border-gray-300'
                       }`}
                     />
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="text-xs text-gray-600 mt-1">
                       Format: BMDC-XXXXX (letters, numbers, and hyphens allowed)
                     </p>
                     {errors.bmdcNumber && (
@@ -454,20 +475,20 @@ export default function ProfessionalApplicationPage() {
                 {applicationData.professionalType === 'PSYCHOLOGIST' && (
                   <>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium text-gray-800 mb-1">
                         Degree *
                       </label>
                       <select
                         name="degree"
                         value={applicationData.degree}
                         onChange={handleInputChange}
-                        className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 ${
+                        className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 text-gray-900 bg-white ${
                           errors.degree ? 'border-red-500' : 'border-gray-300'
                         }`}
                       >
-                        <option value="">Select degree</option>
+                        <option value="" className="text-gray-500">Select degree</option>
                         {DEGREES.map(degree => (
-                          <option key={degree} value={degree}>{degree}</option>
+                          <option key={degree} value={degree} className="text-gray-900">{degree}</option>
                         ))}
                       </select>
                       {errors.degree && (
@@ -476,20 +497,20 @@ export default function ProfessionalApplicationPage() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium text-gray-800 mb-1">
                         Institution *
                       </label>
                       <select
                         name="institution"
                         value={applicationData.institution}
                         onChange={handleInputChange}
-                        className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 ${
+                        className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 text-gray-900 bg-white ${
                           errors.institution ? 'border-red-500' : 'border-gray-300'
                         }`}
                       >
-                        <option value="">Select institution</option>
+                        <option value="" className="text-gray-500">Select institution</option>
                         {INSTITUTIONS.map(institution => (
-                          <option key={institution} value={institution}>{institution}</option>
+                          <option key={institution} value={institution} className="text-gray-900">{institution}</option>
                         ))}
                       </select>
                       {errors.institution && (
@@ -498,7 +519,7 @@ export default function ProfessionalApplicationPage() {
                     </div>
 
                     <div className="md:col-span-2">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium text-gray-800 mb-1">
                         Current Affiliation
                       </label>
                       <input
@@ -507,27 +528,27 @@ export default function ProfessionalApplicationPage() {
                         value={applicationData.affiliation}
                         onChange={handleInputChange}
                         placeholder="Current workplace or affiliation"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 text-gray-900 bg-white placeholder-gray-400"
                       />
                     </div>
                   </>
                 )}
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-800 mb-1">
                     Specialization *
                   </label>
                   <select
                     name="specialization"
                     value={applicationData.specialization}
                     onChange={handleInputChange}
-                    className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 ${
+                    className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 text-gray-900 bg-white ${
                       errors.specialization ? 'border-red-500' : 'border-gray-300'
                     }`}
                   >
-                    <option value="">Select specialization</option>
+                    <option value="" className="text-gray-500">Select specialization</option>
                     {SPECIALIZATIONS.map(spec => (
-                      <option key={spec} value={spec}>{spec}</option>
+                      <option key={spec} value={spec} className="text-gray-900">{spec}</option>
                     ))}
                   </select>
                   {errors.specialization && (
@@ -536,7 +557,7 @@ export default function ProfessionalApplicationPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-800 mb-1">
                     Experience (Years) *
                   </label>
                   <input
@@ -546,7 +567,7 @@ export default function ProfessionalApplicationPage() {
                     onChange={handleInputChange}
                     min="0"
                     placeholder="Years of experience"
-                    className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 ${
+                    className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 text-gray-900 bg-white placeholder-gray-400 ${
                       errors.experienceYears ? 'border-red-500' : 'border-gray-300'
                     }`}
                   />
@@ -562,7 +583,7 @@ export default function ProfessionalApplicationPage() {
               <h2 className="text-xl font-semibold text-gray-900 mb-4">Languages & Contact Information</h2>
               
               <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-800 mb-2">
                   Languages Spoken *
                 </label>
                 <div className="grid md:grid-cols-3 gap-3">
@@ -574,7 +595,7 @@ export default function ProfessionalApplicationPage() {
                         onChange={() => handleLanguageChange(language)}
                         className="mr-2 h-4 w-4 text-teal-600 focus:ring-teal-500 border-gray-300 rounded"
                       />
-                      <span className="text-sm text-gray-700">{language}</span>
+                      <span className="text-sm text-gray-800">{language}</span>
                     </label>
                   ))}
                 </div>
@@ -585,7 +606,7 @@ export default function ProfessionalApplicationPage() {
 
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-800 mb-1">
                     Contact Email *
                   </label>
                   <input
@@ -594,7 +615,7 @@ export default function ProfessionalApplicationPage() {
                     value={applicationData.contactEmail}
                     onChange={handleInputChange}
                     placeholder="Professional contact email"
-                    className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 ${
+                    className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 text-gray-900 bg-white placeholder-gray-400 ${
                       errors.contactEmail ? 'border-red-500' : 'border-gray-300'
                     }`}
                   />
@@ -604,7 +625,7 @@ export default function ProfessionalApplicationPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-800 mb-1">
                     Contact Phone *
                   </label>
                   <input
@@ -613,7 +634,7 @@ export default function ProfessionalApplicationPage() {
                     value={applicationData.contactPhone}
                     onChange={handleInputChange}
                     placeholder="+8801XXXXXXXXX"
-                    className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 ${
+                    className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 text-gray-900 bg-white placeholder-gray-400 ${
                       errors.contactPhone ? 'border-red-500' : 'border-gray-300'
                     }`}
                   />
@@ -623,7 +644,7 @@ export default function ProfessionalApplicationPage() {
                 </div>
 
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-800 mb-1">
                     Clinic/Practice Address
                   </label>
                   <textarea
@@ -632,7 +653,7 @@ export default function ProfessionalApplicationPage() {
                     onChange={handleInputChange}
                     rows={3}
                     placeholder="Full address of your clinic or practice"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 text-gray-900 bg-white placeholder-gray-400"
                   />
                 </div>
               </div>
@@ -643,15 +664,15 @@ export default function ProfessionalApplicationPage() {
               <h2 className="text-xl font-semibold text-gray-900 mb-4">Document Upload</h2>
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-800 mb-1">
                     License Document * 
-                    <span className="text-xs text-gray-500">(PDF, JPG, PNG - Max 10MB)</span>
+                    <span className="text-xs text-gray-600">(PDF, JPG, PNG - Max 10MB)</span>
                   </label>
                   <input
                     type="file"
                     accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
                     onChange={(e) => handleDocumentUpload(e, 'license')}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 text-gray-900 bg-white file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-teal-50 file:text-teal-600 hover:file:bg-teal-100"
                   />
                   {applicationData.licenseDocumentUrl && (
                     <p className="mt-1 text-sm text-green-600">✓ License document uploaded</p>
@@ -662,15 +683,15 @@ export default function ProfessionalApplicationPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-800 mb-1">
                     Degree Certificate 
-                    <span className="text-xs text-gray-500">(PDF, JPG, PNG - Max 10MB)</span>
+                    <span className="text-xs text-gray-600">(PDF, JPG, PNG - Max 10MB)</span>
                   </label>
                   <input
                     type="file"
                     accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
                     onChange={(e) => handleDocumentUpload(e, 'degree')}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 text-gray-900 bg-white file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-teal-50 file:text-teal-600 hover:file:bg-teal-100"
                   />
                   {applicationData.degreeDocumentUrl && (
                     <p className="mt-1 text-sm text-green-600">✓ Degree document uploaded</p>

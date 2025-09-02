@@ -93,6 +93,19 @@ public class ProfessionalVerification {
     @Column(name = "correlation_id", unique = true)
     private String correlationId;
 
+    // AI Confidence fields
+    @Column(name = "ai_confidence_score")
+    private Double aiConfidenceScore;
+
+    @Column(name = "ai_recommendation", columnDefinition = "TEXT")
+    private String aiRecommendation;
+
+    @Column(name = "ai_match_details", columnDefinition = "TEXT")
+    private String aiMatchDetails;
+
+    @Column(name = "ai_processed_at")
+    private LocalDateTime aiProcessedAt;
+
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -184,6 +197,19 @@ public class ProfessionalVerification {
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
 
+    // AI Confidence getters and setters
+    public Double getAiConfidenceScore() { return aiConfidenceScore; }
+    public void setAiConfidenceScore(Double aiConfidenceScore) { this.aiConfidenceScore = aiConfidenceScore; }
+
+    public String getAiRecommendation() { return aiRecommendation; }
+    public void setAiRecommendation(String aiRecommendation) { this.aiRecommendation = aiRecommendation; }
+
+    public String getAiMatchDetails() { return aiMatchDetails; }
+    public void setAiMatchDetails(String aiMatchDetails) { this.aiMatchDetails = aiMatchDetails; }
+
+    public LocalDateTime getAiProcessedAt() { return aiProcessedAt; }
+    public void setAiProcessedAt(LocalDateTime aiProcessedAt) { this.aiProcessedAt = aiProcessedAt; }
+
     // Utility methods
     public boolean isPending() { return status == VerificationStatus.PENDING; }
     public boolean isApproved() { return status == VerificationStatus.APPROVED; }
@@ -207,6 +233,13 @@ public class ProfessionalVerification {
         this.verifiedAt = LocalDateTime.now();
         this.rejectionReason = reason;
         this.adminNotes = notes;
+    }
+
+    public void updateAiConfidence(Double confidenceScore, String recommendation, String matchDetails) {
+        this.aiConfidenceScore = confidenceScore;
+        this.aiRecommendation = recommendation;
+        this.aiMatchDetails = matchDetails;
+        this.aiProcessedAt = LocalDateTime.now();
     }
 
     @PrePersist

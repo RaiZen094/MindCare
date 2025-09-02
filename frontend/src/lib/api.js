@@ -154,7 +154,9 @@ export const apiService = {
 
   async getMyVerificationStatus() {
     return apiWithRetry(async () => {
-      const response = await api.get('/api/pro/verification/my-status');
+      console.log('🔧 API: Calling /api/pro/verification/status');
+      const response = await api.get('/api/pro/verification/status');
+      console.log('🔧 API Response:', response.status, response.data);
       return response.data;
     });
   },

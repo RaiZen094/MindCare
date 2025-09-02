@@ -73,8 +73,9 @@ public class SecurityConfig {
                         // Admin only endpoints
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         
-                        // Professional endpoints
+                        // Professional endpoints - both /pro/** and /professional/**
                         .requestMatchers("/professional/**").hasAnyRole("PROFESSIONAL", "ADMIN")
+                        .requestMatchers("/pro/**").hasAnyRole("PATIENT", "PROFESSIONAL", "ADMIN")
                         
                         // Patient endpoints (authenticated users)
                         .requestMatchers("/patient/**").hasAnyRole("PATIENT", "PROFESSIONAL", "ADMIN")

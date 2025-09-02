@@ -35,6 +35,12 @@ public class ProfessionalVerificationResponse {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
+    // AI Confidence fields
+    private Double aiConfidenceScore;
+    private String aiRecommendation;
+    private String aiMatchDetails;
+    private LocalDateTime aiProcessedAt;
+
     // Constructors
     public ProfessionalVerificationResponse() {}
 
@@ -129,6 +135,19 @@ public class ProfessionalVerificationResponse {
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
 
+    // AI Confidence getters and setters
+    public Double getAiConfidenceScore() { return aiConfidenceScore; }
+    public void setAiConfidenceScore(Double aiConfidenceScore) { this.aiConfidenceScore = aiConfidenceScore; }
+
+    public String getAiRecommendation() { return aiRecommendation; }
+    public void setAiRecommendation(String aiRecommendation) { this.aiRecommendation = aiRecommendation; }
+
+    public String getAiMatchDetails() { return aiMatchDetails; }
+    public void setAiMatchDetails(String aiMatchDetails) { this.aiMatchDetails = aiMatchDetails; }
+
+    public LocalDateTime getAiProcessedAt() { return aiProcessedAt; }
+    public void setAiProcessedAt(LocalDateTime aiProcessedAt) { this.aiProcessedAt = aiProcessedAt; }
+
     // Utility methods
     public String getStatusDisplayName() {
         return status != null ? status.getDisplayName() : "Unknown";
@@ -148,5 +167,13 @@ public class ProfessionalVerificationResponse {
 
     public boolean isRejected() {
         return status == VerificationStatus.REJECTED;
+    }
+
+    public Integer getAiConfidencePercentage() {
+        return aiConfidenceScore != null ? (int) Math.round(aiConfidenceScore * 100) : null;
+    }
+
+    public boolean hasAiProcessing() {
+        return aiProcessedAt != null;
     }
 }
