@@ -31,7 +31,7 @@ services:
       - key: PORT
         value: "8080"
       - key: APP_BASE_URL
-        value: "https://mindcare-backend.render.com/api"
+        value: "https://mindcare-backend-uyos.onrender.com"
       - key: STORAGE_LOCAL_PATH
         value: "/tmp/uploads"
       - key: STORAGE_MAX_FILE_SIZE
