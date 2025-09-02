@@ -140,22 +140,22 @@ export const apiService = {
   // Professional Verification API methods
   async submitProfessionalApplication(applicationData) {
     return apiWithRetry(async () => {
-      const response = await api.post('/api/pro/verification/apply', applicationData);
+      const response = await api.post('/api/professional/verification/apply', applicationData);
       return response.data;
     });
   },
 
   async getProfessionalVerificationStatus() {
     return apiWithRetry(async () => {
-      const response = await api.get('/api/pro/verification/status');
+      const response = await api.get('/api/professional/verification/status');
       return response.data;
     });
   },
 
   async getMyVerificationStatus() {
     return apiWithRetry(async () => {
-      console.log('🔧 API: Calling /api/pro/verification/status');
-      const response = await api.get('/api/pro/verification/status');
+      console.log('🔧 API: Calling /api/professional/verification/status');
+      const response = await api.get('/api/professional/verification/status');
       console.log('🔧 API Response:', response.status, response.data);
       return response.data;
     });
@@ -163,7 +163,7 @@ export const apiService = {
 
   async trackProfessionalApplication(correlationId) {
     return apiWithRetry(async () => {
-      const response = await api.get(`/api/pro/verification/track/${correlationId}`);
+      const response = await api.get(`/api/professional/verification/track/${correlationId}`);
       return response.data;
     });
   },
