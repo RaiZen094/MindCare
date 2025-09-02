@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/public")
-@CrossOrigin(origins = {"http://localhost:3000", "https://mindcare-connect.vercel.app"})
+@RequestMapping("/api/public")
+@CrossOrigin(origins = {"http://localhost:3000", "https://mind-care-zeta.vercel.app"})
 public class PublicController {
     
     /**
@@ -205,16 +205,6 @@ public class PublicController {
             )
         ));
         
-        return ResponseEntity.ok(response);
-    }
-    
-    @GetMapping("/health")
-    public ResponseEntity<Map<String, Object>> healthCheck() {
-        Map<String, Object> response = new HashMap<>();
-        response.put("status", "UP");
-        response.put("service", "MindCare Connect Backend");
-        response.put("timestamp", System.currentTimeMillis());
-        response.put("version", "1.0.0");
         return ResponseEntity.ok(response);
     }
 }

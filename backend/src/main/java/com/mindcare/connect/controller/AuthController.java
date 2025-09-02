@@ -13,8 +13,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/auth")
-@CrossOrigin(origins = {"http://localhost:3000", "https://mindcare-connect.vercel.app"})
+@RequestMapping("/api/auth")
+@CrossOrigin(origins = {"http://localhost:3000", "https://mind-care-zeta.vercel.app"})
 public class AuthController {
     
     private final UserService userService;

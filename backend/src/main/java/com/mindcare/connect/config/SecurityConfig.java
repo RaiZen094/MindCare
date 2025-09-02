@@ -65,25 +65,26 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authz -> authz
                         // Public endpoints
-                        .requestMatchers("/auth/**").permitAll()
-                        .requestMatchers("/public/**").permitAll()
+                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/public/**").permitAll()
                         .requestMatchers("/health").permitAll()
                         .requestMatchers("/actuator/**").permitAll()
+                        .requestMatchers("/").permitAll()
                         
                         // Admin only endpoints
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         
                         // Professional endpoints
-                        .requestMatchers("/professional/**").hasAnyRole("PROFESSIONAL", "ADMIN")
+                        .requestMatchers("/api/professional/**").hasAnyRole("PROFESSIONAL", "ADMIN")
                         
                         // Patient endpoints (authenticated users)
-                        .requestMatchers("/patient/**").hasAnyRole("PATIENT", "PROFESSIONAL", "ADMIN")
-                        .requestMatchers("/appointments/**").hasAnyRole("PATIENT", "PROFESSIONAL", "ADMIN")
-                        .requestMatchers("/wellness/**").hasAnyRole("PATIENT", "PROFESSIONAL", "ADMIN")
+                        .requestMatchers("/api/patient/**").hasAnyRole("PATIENT", "PROFESSIONAL", "ADMIN")
+                        .requestMatchers("/api/appointments/**").hasAnyRole("PATIENT", "PROFESSIONAL", "ADMIN")
+                        .requestMatchers("/api/wellness/**").hasAnyRole("PATIENT", "PROFESSIONAL", "ADMIN")
                         
                         // Community moderation
-                        .requestMatchers("/community/moderate/**").hasAnyRole("MODERATOR", "ADMIN")
-                        .requestMatchers("/community/**").hasAnyRole("PATIENT", "PROFESSIONAL", "MODERATOR", "ADMIN")
+                        .requestMatchers("/api/community/moderate/**").hasAnyRole("MODERATOR", "ADMIN")
+                        .requestMatchers("/api/community/**").hasAnyRole("PATIENT", "PROFESSIONAL", "MODERATOR", "ADMIN")
                         
                         // All other requests need authentication
                         .anyRequest().authenticated()
@@ -106,6 +107,7 @@ public class SecurityConfig {
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
         configuration.setExposedHeaders(Arrays.asList("Authorization"));
+        configuration.setMaxAge(3600L); // 1 hour cache for preflight requests
         
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);

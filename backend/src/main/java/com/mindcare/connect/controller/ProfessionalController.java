@@ -18,7 +18,7 @@ import java.util.Optional;
  * These endpoints are for users who want to apply for or manage professional verification
  */
 @RestController
-@RequestMapping("/pro")
+@RequestMapping("/api/professional")
 @CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001"}, allowCredentials = "true")
 public class ProfessionalController {
 

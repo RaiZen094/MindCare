@@ -23,7 +23,7 @@ public class DocumentService {
 
     private static final Logger logger = LoggerFactory.getLogger(DocumentService.class);
 
-    @Value("${app.base-url:${APP_BASE_URL:http://localhost:8080/api}}")
+    @Value("${app.base-url:${APP_BASE_URL:http://localhost:8080}}")
     private String baseUrl;
 
     @Value("${storage.local.path:${STORAGE_LOCAL_PATH:./uploads}}")

@@ -26,7 +26,7 @@ import java.util.Map;
  * These endpoints are for admins to manage professional verification applications
  */
 @RestController
-@RequestMapping("/admin")
+@RequestMapping("/api/admin")
 @CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001"}, allowCredentials = "true")
 public class AdminController {
 
