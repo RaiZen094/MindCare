@@ -65,26 +65,25 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authz -> authz
                         // Public endpoints
-                        .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/public/**").permitAll()
+                        .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/public/**").permitAll()
                         .requestMatchers("/health").permitAll()
                         .requestMatchers("/actuator/**").permitAll()
-                        .requestMatchers("/").permitAll()
                         
                         // Admin only endpoints
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
                         
                         // Professional endpoints
-                        .requestMatchers("/api/professional/**").hasAnyRole("PROFESSIONAL", "ADMIN")
+                        .requestMatchers("/professional/**").hasAnyRole("PATIENT", "PROFESSIONAL", "ADMIN")
                         
                         // Patient endpoints (authenticated users)
-                        .requestMatchers("/api/patient/**").hasAnyRole("PATIENT", "PROFESSIONAL", "ADMIN")
-                        .requestMatchers("/api/appointments/**").hasAnyRole("PATIENT", "PROFESSIONAL", "ADMIN")
-                        .requestMatchers("/api/wellness/**").hasAnyRole("PATIENT", "PROFESSIONAL", "ADMIN")
+                        .requestMatchers("/patient/**").hasAnyRole("PATIENT", "PROFESSIONAL", "ADMIN")
+                        .requestMatchers("/appointments/**").hasAnyRole("PATIENT", "PROFESSIONAL", "ADMIN")
+                        .requestMatchers("/wellness/**").hasAnyRole("PATIENT", "PROFESSIONAL", "ADMIN")
                         
                         // Community moderation
-                        .requestMatchers("/api/community/moderate/**").hasAnyRole("MODERATOR", "ADMIN")
-                        .requestMatchers("/api/community/**").hasAnyRole("PATIENT", "PROFESSIONAL", "MODERATOR", "ADMIN")
+                        .requestMatchers("/community/moderate/**").hasAnyRole("MODERATOR", "ADMIN")
+                        .requestMatchers("/community/**").hasAnyRole("PATIENT", "PROFESSIONAL", "MODERATOR", "ADMIN")
                         
                         // All other requests need authentication
                         .anyRequest().authenticated()

@@ -18,7 +18,7 @@ import java.util.Map;
  * Following Integrity Pact: Signed URLs, rate limiting, secure access
  */
 @RestController
-@RequestMapping("/api/documents")
+@RequestMapping("/documents")
 @CrossOrigin(origins = {"http://localhost:3000", "https://mind-care-zeta.vercel.app"}, allowCredentials = "true")
 public class DocumentController {
 

@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/public")
+@RequestMapping("/public")
 @CrossOrigin(origins = {"http://localhost:3000", "https://mind-care-zeta.vercel.app"})
 public class PublicController {
     
