@@ -23,9 +23,12 @@ export default function Home() {
                 <Link href="#services" className="text-gray-700 hover:text-teal-600 px-3 py-2 rounded-md text-sm font-medium">
                   Services
                 </Link>
-                <Link href="#professionals" className="text-gray-700 hover:text-teal-600 px-3 py-2 rounded-md text-sm font-medium">
-                  Find Professionals
-                </Link>
+                {/* Only show directory to public users and patients, not professionals or admins */}
+                {(!isAuthenticated || (user && !user.roles?.includes('PROFESSIONAL') && !user.roles?.includes('ADMIN'))) && (
+                  <Link href="/directory" className="text-gray-700 hover:text-teal-600 px-3 py-2 rounded-md text-sm font-medium">
+                    Find Professionals
+                  </Link>
+                )}
                 <Link href="#wellness" className="text-gray-700 hover:text-teal-600 px-3 py-2 rounded-md text-sm font-medium">
                   Wellness Hub
                 </Link>
@@ -34,14 +37,21 @@ export default function Home() {
                 </Link>
                 {isAuthenticated ? (
                   <div className="flex items-center space-x-4">
-                    <Link href="/dashboard" className="text-gray-700 hover:text-teal-600 px-3 py-2 rounded-md text-sm font-medium">
-                      Dashboard
-                    </Link>
+                    {/* Patient Dashboard */}
+                    {user?.roles?.includes('PATIENT') || (!user?.roles?.includes('PROFESSIONAL') && !user?.roles?.includes('ADMIN')) ? (
+                      <Link href="/dashboard" className="text-gray-700 hover:text-teal-600 px-3 py-2 rounded-md text-sm font-medium">
+                        Dashboard
+                      </Link>
+                    ) : null}
+                    
+                    {/* Professional Portal */}
                     {user?.roles?.includes('PROFESSIONAL') && (
                       <Link href="/professional" className="text-gray-700 hover:text-teal-600 px-3 py-2 rounded-md text-sm font-medium">
                         Professional Portal
                       </Link>
                     )}
+                    
+                    {/* Admin Portal */}
                     {user?.roles?.includes('ADMIN') && (
                       <Link href="/admin" className="text-gray-700 hover:text-red-600 px-3 py-2 rounded-md text-sm font-medium">
                         Admin Portal
@@ -98,21 +108,46 @@ export default function Home() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               {isAuthenticated ? (
-                <>
-                  <Link href="/professionals" className="bg-teal-600 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-teal-700 transition-colors shadow-lg">
-                    Find a Professional
-                  </Link>
-                  <Link href="/dashboard" className="border-2 border-teal-600 text-teal-600 px-8 py-3 rounded-lg text-lg font-semibold hover:bg-teal-50 transition-colors">
-                    Go to Dashboard
-                  </Link>
-                </>
+                // Authenticated users - different CTAs based on role
+                user?.roles?.includes('PROFESSIONAL') ? (
+                  // Professionals see their portal
+                  <>
+                    <Link href="/professional" className="bg-teal-600 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-teal-700 transition-colors shadow-lg">
+                      Professional Portal
+                    </Link>
+                    <Link href="/professional/dashboard" className="border-2 border-teal-600 text-teal-600 px-8 py-3 rounded-lg text-lg font-semibold hover:bg-teal-50 transition-colors">
+                      Go to Dashboard
+                    </Link>
+                  </>
+                ) : user?.roles?.includes('ADMIN') ? (
+                  // Admins see admin portal
+                  <>
+                    <Link href="/admin" className="bg-red-600 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-red-700 transition-colors shadow-lg">
+                      Admin Portal
+                    </Link>
+                    <Link href="/admin/dashboard" className="border-2 border-red-600 text-red-600 px-8 py-3 rounded-lg text-lg font-semibold hover:bg-red-50 transition-colors">
+                      Go to Dashboard
+                    </Link>
+                  </>
+                ) : (
+                  // Patients/Regular users see directory and dashboard
+                  <>
+                    <Link href="/directory" className="bg-teal-600 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-teal-700 transition-colors shadow-lg">
+                      Find a Professional
+                    </Link>
+                    <Link href="/dashboard" className="border-2 border-teal-600 text-teal-600 px-8 py-3 rounded-lg text-lg font-semibold hover:bg-teal-50 transition-colors">
+                      Go to Dashboard
+                    </Link>
+                  </>
+                )
               ) : (
+                // Non-authenticated users see directory and registration
                 <>
                   <Link href="/auth/register" className="bg-teal-600 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-teal-700 transition-colors shadow-lg">
                     Get Started
                   </Link>
-                  <Link href="/ai-assessment" className="border-2 border-teal-600 text-teal-600 px-8 py-3 rounded-lg text-lg font-semibold hover:bg-teal-50 transition-colors">
-                    Try AI Assessment
+                  <Link href="/directory" className="border-2 border-teal-600 text-teal-600 px-8 py-3 rounded-lg text-lg font-semibold hover:bg-teal-50 transition-colors">
+                    Browse Professionals
                   </Link>
                 </>
               )}
@@ -217,35 +252,42 @@ export default function Home() {
             </div>
             <div className="bg-white p-8 rounded-lg shadow-lg">
               <h3 className="text-xl font-semibold text-gray-900 mb-4">Find Your Mental Health Professional</h3>
-              <form className="space-y-4">
+              <form className="space-y-4" onSubmit={(e) => {
+                e.preventDefault();
+                const formData = new FormData(e.target);
+                const params = new URLSearchParams();
+                if (formData.get('specialization')) params.set('specialization', formData.get('specialization'));
+                if (formData.get('location')) params.set('location', formData.get('location'));
+                if (formData.get('language')) params.set('language', formData.get('language'));
+                window.location.href = `/directory?${params.toString()}`;
+              }}>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Specialization</label>
-                  <select className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500">
-                    <option>Select specialization</option>
-                    <option>Anxiety Disorders</option>
-                    <option>Depression</option>
-                    <option>PTSD</option>
-                    <option>Addiction</option>
-                    <option>Family Therapy</option>
+                  <select name="specialization" className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                    <option value="">Select specialization</option>
+                    <option value="Anxiety Disorders">Anxiety Disorders</option>
+                    <option value="Depression">Depression</option>
+                    <option value="PTSD">PTSD</option>
+                    <option value="Addiction">Addiction</option>
+                    <option value="Family Therapy">Family Therapy</option>
                   </select>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
-                  <select className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500">
-                    <option>Select city</option>
-                    <option>Dhaka</option>
-                    <option>Chittagong</option>
-                    <option>Sylhet</option>
-                    <option>Online Only</option>
+                  <select name="location" className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                    <option value="">Select city</option>
+                    <option value="Dhaka">Dhaka</option>
+                    <option value="Chittagong">Chittagong</option>
+                    <option value="Sylhet">Sylhet</option>
+                    <option value="Online">Online Only</option>
                   </select>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Language</label>
-                  <select className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500">
-                    <option>Select language</option>
-                    <option>Bengali</option>
-                    <option>English</option>
-                    <option>Both</option>
+                  <select name="language" className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                    <option value="">Select language</option>
+                    <option value="Bengali">Bengali</option>
+                    <option value="English">English</option>
                   </select>
                 </div>
                 <button type="submit" className="w-full bg-teal-600 text-white py-2 rounded-md hover:bg-teal-700 transition-colors">

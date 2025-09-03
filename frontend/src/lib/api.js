@@ -263,6 +263,39 @@ export const apiService = {
     });
   },
 
+  // Public Professional Directory API methods (no auth required)
+  async getVerifiedProfessionals(page = 0, size = 12, filters = {}) {
+    return apiWithRetry(async () => {
+      const params = new URLSearchParams({ page, size });
+      
+      // Add filters if provided
+      if (filters.search) params.append('search', filters.search);
+      if (filters.professionalType) params.append('professionalType', filters.professionalType);
+      if (filters.specialization) params.append('specialization', filters.specialization);
+      if (filters.location) params.append('location', filters.location);
+      if (filters.language) params.append('language', filters.language);
+      if (filters.minExperience) params.append('minExperience', filters.minExperience);
+      if (filters.maxExperience) params.append('maxExperience', filters.maxExperience);
+      
+      const response = await api.get(`/api/public/professionals?${params}`);
+      return response.data;
+    });
+  },
+
+  async getProfessionalProfile(professionalId) {
+    return apiWithRetry(async () => {
+      const response = await api.get(`/api/public/professionals/${professionalId}`);
+      return response.data;
+    });
+  },
+
+  async getDirectoryFilters() {
+    return apiWithRetry(async () => {
+      const response = await api.get('/api/public/professionals/filters');
+      return response.data;
+    });
+  },
+
   // Generic get method for backward compatibility
   async get(endpoint) {
     return apiWithRetry(async () => {

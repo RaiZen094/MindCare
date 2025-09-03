@@ -1,16 +1,41 @@
 package com.mindcare.connect.controller;
 
+import com.mindcare.connect.dto.PageResponse;
+import com.mindcare.connect.dto.ProfessionalDirectoryDto;
+import com.mindcare.connect.dto.ProfessionalFilterDto;
+import com.mindcare.connect.dto.ProfessionalProfileDto;
+import com.mindcare.connect.entity.ProfessionalType;
+import com.mindcare.connect.service.ProfessionalDirectoryService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
+/**
+ * Public Controller for verified professional directory
+ * Following Integrity Pact: Public access to verified professionals for:
+ * - Public/unauthenticated users (can browse)
+ * - Patients (can browse and potentially book)
+ * - NOT accessible via frontend for professionals or admins (they have their own dashboards)
+ */
 @RestController
 @RequestMapping("/public")
 @CrossOrigin(origins = {"http://localhost:3000", "https://mindcare-connect.vercel.app"})
 public class PublicController {
+    
+    private static final Logger logger = LoggerFactory.getLogger(PublicController.class);
+    
+    @Autowired
+    private ProfessionalDirectoryService professionalDirectoryService;
     
     /**
      * General User (Anonymous) Features
@@ -58,48 +83,117 @@ public class PublicController {
         return ResponseEntity.ok(response);
     }
     
+    /**
+     * Verified Professional Directory - Get paginated list of verified professionals
+     * Public access - no authentication required
+     * 
+     * @param page Page number (0-based)
+     * @param size Number of items per page
+     * @param search Search term for name, specialization, or institution
+     * @param professionalType Filter by professional type
+     * @param specialization Filter by specialization
+     * @param location Filter by location/city
+     * @param language Filter by spoken language
+     * @param minExperience Minimum years of experience
+     * @param maxExperience Maximum years of experience
+     * @return Paginated list of verified professionals
+     */
     @GetMapping("/professionals")
-    public ResponseEntity<Map<String, Object>> getProfessionalsList() {
-        Map<String, Object> response = new HashMap<>();
+    public ResponseEntity<PageResponse<ProfessionalDirectoryDto>> getVerifiedProfessionals(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "12") int size,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) ProfessionalType professionalType,
+            @RequestParam(required = false) String specialization,
+            @RequestParam(required = false) String location,
+            @RequestParam(required = false) String language,
+            @RequestParam(required = false) Integer minExperience,
+            @RequestParam(required = false) Integer maxExperience) {
         
-        // Mock professionals list (public profiles only)
-        response.put("professionals", List.of(
-            Map.of(
-                "id", 1,
-                "name", "Dr. Fatima Rahman",
-                "specialization", "Clinical Psychologist",
-                "experience", "8 years",
-                "location", "Dhaka, Bangladesh",
-                "languages", List.of("Bengali", "English"),
-                "rating", 4.8,
-                "consultationFee", "1500 BDT",
-                "available", true
-            ),
-            Map.of(
-                "id", 2,
-                "name", "Dr. Ahmed Hassan",
-                "specialization", "Psychiatrist",
-                "experience", "12 years",
-                "location", "Chittagong, Bangladesh",
-                "languages", List.of("Bengali", "English", "Arabic"),
-                "rating", 4.9,
-                "consultationFee", "2000 BDT",
-                "available", true
-            ),
-            Map.of(
-                "id", 3,
-                "name", "Sarah Khan",
-                "specialization", "Family Therapist",
-                "experience", "6 years",
-                "location", "Sylhet, Bangladesh",
-                "languages", List.of("Bengali", "English"),
-                "rating", 4.7,
-                "consultationFee", "1200 BDT",
-                "available", false
-            )
-        ));
+        logger.info("Getting verified professionals - page: {}, size: {}, search: '{}'", page, size, search);
         
-        return ResponseEntity.ok(response);
+        try {
+            // Create filters object
+            ProfessionalFilterDto filters = new ProfessionalFilterDto();
+            filters.setSearch(search);
+            filters.setProfessionalType(professionalType);
+            filters.setSpecialization(specialization);
+            filters.setLocation(location);
+            filters.setLanguage(language);
+            filters.setMinExperience(minExperience);
+            filters.setMaxExperience(maxExperience);
+            
+            // Create pageable with sorting by verification date (most recent first)
+            Pageable pageable = PageRequest.of(page, size, Sort.by("verifiedAt").descending());
+            
+            PageResponse<ProfessionalDirectoryDto> response = professionalDirectoryService
+                .getVerifiedProfessionals(pageable, filters);
+            
+            logger.info("Successfully retrieved {} professionals on page {}", 
+                response.getContent().size(), page);
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            logger.error("Error retrieving verified professionals", e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+    
+    /**
+     * Professional Profile - Get detailed profile of a verified professional
+     * Public access - no authentication required
+     * 
+     * @param id Professional verification ID
+     * @return Detailed professional profile
+     */
+    @GetMapping("/professionals/{id}")
+    public ResponseEntity<ProfessionalProfileDto> getProfessionalProfile(@PathVariable Long id) {
+        logger.info("Getting professional profile for ID: {}", id);
+        
+        try {
+            Optional<ProfessionalProfileDto> profile = professionalDirectoryService
+                .getVerifiedProfessionalProfile(id);
+            
+            if (profile.isPresent()) {
+                logger.info("Successfully retrieved profile for professional ID: {}", id);
+                return ResponseEntity.ok(profile.get());
+            } else {
+                logger.warn("Professional profile not found or not verified for ID: {}", id);
+                return ResponseEntity.notFound().build();
+            }
+            
+        } catch (Exception e) {
+            logger.error("Error retrieving professional profile for ID: {}", id, e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+    
+    /**
+     * Directory Filters - Get available filter options for the directory
+     * Public access - no authentication required
+     * 
+     * @return Available specializations, locations, and languages
+     */
+    @GetMapping("/professionals/filters")
+    public ResponseEntity<Map<String, Object>> getDirectoryFilters() {
+        logger.info("Getting directory filter options");
+        
+        try {
+            Map<String, Object> filters = new HashMap<>();
+            
+            filters.put("specializations", professionalDirectoryService.getAvailableSpecializations());
+            filters.put("locations", professionalDirectoryService.getAvailableLocations());
+            filters.put("languages", professionalDirectoryService.getAvailableLanguages());
+            filters.put("professionalTypes", List.of(ProfessionalType.values()));
+            
+            logger.info("Successfully retrieved directory filters");
+            return ResponseEntity.ok(filters);
+            
+        } catch (Exception e) {
+            logger.error("Error retrieving directory filters", e);
+            return ResponseEntity.internalServerError().build();
+        }
     }
     
     @PostMapping("/ai-assessment")

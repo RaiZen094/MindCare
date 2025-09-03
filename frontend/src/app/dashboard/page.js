@@ -13,7 +13,9 @@ import {
   Bell,
   Shield,
   CheckCircle,
-  AlertCircle
+  AlertCircle,
+  Search,
+  UserCheck
 } from 'lucide-react';
 
 export default function Dashboard() {
@@ -168,6 +170,16 @@ export default function Dashboard() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             {isPatient() && (
               <>
+                <Link href="/directory" className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow">
+                  <div className="flex items-center">
+                    <Search className="w-8 h-8 text-blue-600 mr-3" />
+                    <div>
+                      <h3 className="font-semibold text-gray-900">Find Professionals</h3>
+                      <p className="text-sm text-gray-600">Browse verified therapists</p>
+                    </div>
+                  </div>
+                </Link>
+
                 <Link href="/appointments" className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow">
                   <div className="flex items-center">
                     <Calendar className="w-8 h-8 text-teal-600 mr-3" />
@@ -311,17 +323,21 @@ export default function Dashboard() {
               {isPatient() && (
                 <div className="space-y-4">
                   <p className="text-gray-600">
-                    Welcome to your mental health dashboard. Here you can track your progress, 
-                    book appointments with verified professionals, and access wellness resources.
+                    Welcome to your mental health dashboard. Here you can find verified professionals, 
+                    track your progress, book appointments, and access wellness resources.
                   </p>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+                    <div className="bg-blue-50 p-4 rounded-lg">
+                      <h4 className="font-medium text-blue-900">Find Help</h4>
+                      <p className="text-sm text-blue-700 mt-1">
+                        <Link href="/directory" className="hover:underline">
+                          Browse verified professionals
+                        </Link>
+                      </p>
+                    </div>
                     <div className="bg-teal-50 p-4 rounded-lg">
                       <h4 className="font-medium text-teal-900">Next Appointment</h4>
                       <p className="text-sm text-teal-700 mt-1">No upcoming appointments</p>
-                    </div>
-                    <div className="bg-blue-50 p-4 rounded-lg">
-                      <h4 className="font-medium text-blue-900">Mood Tracking</h4>
-                      <p className="text-sm text-blue-700 mt-1">Start tracking your mood</p>
                     </div>
                     <div className="bg-purple-50 p-4 rounded-lg">
                       <h4 className="font-medium text-purple-900">AI Support</h4>
